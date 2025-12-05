@@ -131,11 +131,24 @@ def convert_pwx_to_tcx(input_file, output_file):
     print(f"Successfully converted {input_file} to {output_file}")
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print("Usage: python convert_pwx_to_tcx.py <input_pwx> <output_tcx>")
+    if len(sys.argv) < 2:
+        print("Usage: python convert_pwx_to_tcx.py <input_pwx> [output_tcx]")
         sys.exit(1)
     
     input_pwx = sys.argv[1]
-    output_tcx = sys.argv[2]
+    
+    # Determine output filename
+    if len(sys.argv) >= 3:
+        output_filename = os.path.basename(sys.argv[2])
+    else:
+        # Default to input filename with .tcx extension
+        base_name = os.path.splitext(os.path.basename(input_pwx))[0]
+        output_filename = f"{base_name}.tcx"
+    
+    # Ensure output directory exists
+    output_dir = "converted"
+    os.makedirs(output_dir, exist_ok=True)
+    
+    output_tcx = os.path.join(output_dir, output_filename)
     
     convert_pwx_to_tcx(input_pwx, output_tcx)
