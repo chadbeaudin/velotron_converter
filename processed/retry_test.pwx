@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<pwx xmlns="http://www.peaksware.com/PWX/1/0" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" creator="RacerMate One">
+  <workout>
+    <sportType>Bike</sportType>
+    <title>Test Workout</title>
+    <time>2023-10-27T10:00:00</time>
+    <summarydata>
+      <duration>60.0</duration>
+      <dist>500.0</dist>
+    </summarydata>
+    <segment>
+        <name>Segment 1</name>
+    </segment>
+    <sample>
+      <timeoffset>0</timeoffset>
+      <hr>120</hr>
+      <spd>5.0</spd>
+      <pwr>100</pwr>
+      <cad>80</cad>
+      <dist>0</dist>
+    </sample>
+    <sample>
+      <timeoffset>10</timeoffset>
+      <hr>125</hr>
+      <spd>5.5</spd>
+      <pwr>110</pwr>
+      <cad>82</cad>
+      <dist>50</dist>
+    </sample>
+    <sample>
+      <timeoffset>20</timeoffset>
+      <hr>130</hr>
+      <spd>6.0</spd>
+      <pwr>120</pwr>
+      <cad>85</cad>
+      <dist>110</dist>
+    </sample>
+    <sample>
+      <timeoffset>30</timeoffset>
+      <hr>135</hr>
+      <spd>6.5</spd>
+      <pwr>130</pwr>
+      <cad>88</cad>
+      <dist>175</dist>
+    </sample>
+    <sample>
+      <timeoffset>60</timeoffset>
+      <hr>140</hr>
+      <spd>7.0</spd>
+      <pwr>140</pwr>
+      <cad>90</cad>
+      <dist>500</dist>
+    </sample>
+  </workout>
+</pwx>
