@@ -3,12 +3,13 @@ import time
 import shutil
 import sys
 import datetime
-try:
-    from convert_pwx_to_fit import convert_pwx_to_fit
-except ImportError:
-    print("Error: Missing required library 'fit_tool'.")
-    print("Please install it by running: pip install fit_tool")
-    sys.exit(1)
+from convert_pwx_to_tcx import convert_pwx_to_tcx
+# try:
+#     from convert_pwx_to_fit import convert_pwx_to_fit
+# except ImportError:
+#     print("Error: Missing required library 'fit_tool'.")
+#     print("Please install it by running: pip install fit_tool")
+#     sys.exit(1)
 
 # Configuration
 BASE_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
@@ -35,7 +36,7 @@ def process_file(filename):
     
     # Generate output filename
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    output_filename = f"{timestamp}.fit"
+    output_filename = f"{timestamp}.tcx"
     # Output goes to 'converted'
     output_path = os.path.join(BASE_DIRECTORY, CONVERTED_DIR_NAME, output_filename)
     
@@ -45,7 +46,7 @@ def process_file(filename):
     
     try:
         # Convert
-        convert_pwx_to_fit(input_path, output_path)
+        convert_pwx_to_tcx(input_path, output_path)
         
         # Move original file to 'processed'
         processed_dest = os.path.join(BASE_DIRECTORY, PROCESSED_DIR_NAME, filename)

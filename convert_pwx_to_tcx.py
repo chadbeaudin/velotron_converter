@@ -49,6 +49,18 @@ def convert_pwx_to_tcx(input_file, output_file):
     activities = ET.SubElement(tcx_root, "Activities")
     activity = ET.SubElement(activities, "Activity", Sport="Biking")
     ET.SubElement(activity, "Id").text = start_time_str
+    
+    # Creator metadata (copied from working sample to ensure Strava trusts elevation)
+    creator = ET.SubElement(activity, "Creator")
+    creator.set(f"{{{xsi_ns}}}type", "Device_t")
+    ET.SubElement(creator, "Name").text = "Garmin TCX with Barometer"
+    ET.SubElement(creator, "UnitId").text = "0"
+    ET.SubElement(creator, "ProductId").text = "20119"
+    version = ET.SubElement(creator, "Version")
+    ET.SubElement(version, "VersionMajor").text = "0"
+    ET.SubElement(version, "VersionMinor").text = "0"
+    ET.SubElement(version, "BuildMajor").text = "0"
+    ET.SubElement(version, "BuildMinor").text = "0"
 
     lap = ET.SubElement(activity, "Lap", StartTime=start_time_str)
     
@@ -103,12 +115,8 @@ def convert_pwx_to_tcx(input_file, output_file):
         pwr_node = sample.find('pwx:pwr', ns_pwx)
         spd_node = sample.find('pwx:spd', ns_pwx)
 
-        # 2. Position (Added for Strava compatibility)
-        # Strava often ignores altitude if no GPS data is present.
-        # We provide a static (0,0) position.
-        position = ET.SubElement(trackpoint, "Position")
-        ET.SubElement(position, "LatitudeDegrees").text = "0.0"
-        ET.SubElement(position, "LongitudeDegrees").text = "0.0"
+        # 2. Position (Removed: Strava overwrites elevation if 0,0 is provided)
+        # We provide no position so Strava respects device altitude.
 
         # 3. AltitudeMeters (Must be before Distance, HR, Cadence)
         if alt_node is not None:
