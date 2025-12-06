@@ -1,36 +1,53 @@
-import xml.etree.ElementTree as ET
 import datetime
-import sys
 from fit_tool.fit_file_builder import FitFileBuilder
 from fit_tool.profile.messages.file_id_message import FileIdMessage
-from fit_tool.profile.messages.session_message import SessionMessage
-from fit_tool.profile.messages.lap_message import LapMessage
 from fit_tool.profile.messages.record_message import RecordMessage
+from fit_tool.profile.messages.lap_message import LapMessage
+from fit_tool.profile.messages.session_message import SessionMessage
 from fit_tool.profile.messages.event_message import EventMessage
-from fit_tool.profile.profile_type import FileType, Manufacturer, Sport, SubSport, Event, EventType
+from fit_tool.profile.profile_type import Manufacturer, FileType, Sport, SubSport, Event, EventType
+import xml.etree.ElementTree as ET
+import sys
 
 def convert_pwx_to_fit(pwx_file_path, fit_file_path):
-    # print(f"Reading PWX: {pwx_file_path}")
+    # Namespaces
+    ns_pwx = {'pwx': 'http://www.thierrys-world.de/pwx/'} # Adjust if different
+    
+    # Parse XML
     tree = ET.parse(pwx_file_path)
     root = tree.getroot()
-    ns_pwx = {'pwx': 'http://www.peaksware.com/PWX/1/0'}
 
-    workout_node = root.find('pwx:workout', ns_pwx)
+    # robust namespace handling
+    if '}' in root.tag:
+        ns_url = root.tag.split('}')[0].strip('{')
+        ns_pwx = {'pwx': ns_url}
+    else:
+        ns_pwx = {}
+
+    # Find workout
+    if ns_pwx:
+        workout_node = root.find('pwx:workout', ns_pwx)
+    else:
+        workout_node = root.find('workout')
+
     if workout_node is None:
-        raise ValueError("No workout node found in PWX file")
+        raise ValueError("No 'workout' element found in PWX file")
+
+    builder = FitFileBuilder(auto_define=True, min_string_size=50)
 
     # Time parsing
     time_str = workout_node.find('pwx:time', ns_pwx).text
-    start_time = datetime.datetime.fromisoformat(time_str)
-    
-    # Initialize FIT builder
-    builder = FitFileBuilder(auto_define=True, min_string_size=50)
+    try:
+        start_time = datetime.datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%S")
+    except ValueError:
+        # Try with fractional seconds
+        start_time = datetime.datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%S.%f")
 
     # 1. File ID
     file_id = FileIdMessage()
     file_id.type = FileType.ACTIVITY
     file_id.manufacturer = Manufacturer.GARMIN
-    file_id.product = 0
+    file_id.product = 20119  # Matches Garmin Edge 500 (from good TCX)
     file_id.serial_number = 12345
     file_id.time_created = round(start_time.timestamp() * 1000)
     builder.add(file_id)
@@ -51,7 +68,7 @@ def convert_pwx_to_fit(pwx_file_path, fit_file_path):
     event_start.timestamp = round(start_time.timestamp() * 1000)
     builder.add(event_start)
 
-    print(f"Converting {len(samples)} samples...")
+    print(f"Converting {len(samples)} samples to FIT...")
     for i, sample in enumerate(samples):
         # Progress update every 10%
         if len(samples) > 0 and i % (len(samples) // 10 if len(samples) >= 10 else 1) == 0:
@@ -66,10 +83,11 @@ def convert_pwx_to_fit(pwx_file_path, fit_file_path):
         record = RecordMessage()
         record.timestamp = timestamp_ms
         
-        # Position: Use valid static coordinates (from reference file) to satisfy Strava
-        # Note: fit_tool handles degree->semicircle conversion if we pass floats
-        record.position_lat = 39.0399566385895
-        record.position_long = -104.59640812128782
+        # Position: REMOVED. 
+        # Providing (0,0) allows Strava to overwrite elevation with sea level.
+        # Providing valid but fake GPS might work, but 'No Position' is safest for Indoor.
+        # record.position_lat = ...
+        # record.position_long = ...
 
         # Distance
         dist_node = sample.find('pwx:dist', ns_pwx)
@@ -81,8 +99,7 @@ def convert_pwx_to_fit(pwx_file_path, fit_file_path):
         # Altitude
         alt_node = sample.find('pwx:alt', ns_pwx)
         if alt_node is not None:
-            # Add 1000m offset because strava might ignore 0-ish elevation
-            alt = float(alt_node.text) + 1000.0 
+            alt = float(alt_node.text)
             record.altitude = alt           # legacy field
             record.enhanced_altitude = alt  # High precision field
             if prev_alt is not None:
@@ -144,33 +161,22 @@ def convert_pwx_to_fit(pwx_file_path, fit_file_path):
     session.max_speed = max_speed
     session.total_ascent = total_ascent
     session.sport = Sport.CYCLING
-    session.sub_sport = SubSport.INDOOR_CYCLING
+    session.sub_sport = SubSport.INDOOR_CYCLING # Explicitly Indoor
     session.first_lap_index = 0
     session.num_laps = 1
     builder.add(session)
-    
-    # Stop Event
-    event_stop = EventMessage()
-    event_stop.event = Event.TIMER
-    event_stop.event_type = EventType.STOP_ALL
-    event_stop.timestamp = session.timestamp
-    builder.add(event_stop)
 
     fit_file = builder.build()
-    
-    # print(f"Writing FIT: {fit_file_path}")
     fit_file.to_file(fit_file_path)
 
-    # Calculate Summary Stats
+    # Print Summary
     dist_miles = total_dist * 0.000621371
-    duration_str = str(datetime.timedelta(seconds=int(elapsed_time_val)))
-    elevation_feet = total_ascent * 3.28084
-
-    print("\nConversion Summary:")
-    print("-" * 20)
+    dur_str = str(datetime.timedelta(seconds=int(elapsed_time_val)))
+    elev_feet = total_ascent * 3.28084
+    
+    print("\nFIT Conversion Summary:")
+    print("--------------------")
     print(f"Distance:  {dist_miles:.2f} miles")
-    print(f"Duration:  {duration_str}")
-    print(f"Elevation: {int(elevation_feet)} feet")
-    print("-" * 20)
-    print("")
-    sys.stdout.flush()
+    print(f"Duration:  {dur_str}")
+    print(f"Elevation: {elev_feet:.0f} feet")
+    print("--------------------")

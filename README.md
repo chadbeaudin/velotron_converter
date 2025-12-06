@@ -6,10 +6,13 @@ This utility monitors a directory for RacerMate Velotron `.pwx` files and automa
 
 ### Prerequisites
 - Python 3.x
+- `pip install fit_tool` (Optional, required for `.fit` file generation)
 
 1.  Ensure you have Python 3 installed.
 2.  Install dependencies:
-    *   No external dependencies are required (uses standard libraries only).
+    ```bash
+    pip install fit_tool
+    ```
 
 ## Usage
 
@@ -21,7 +24,10 @@ This utility monitors a directory for RacerMate Velotron `.pwx` files and automa
 
 2.  **Convert Files**:
     *   Drop your `.pwx` files into the `original` folder.
-    *   The script will detect the file, convert it, and place the result in the `converted` folder.
+    *   The script will generate **two** output files in the `converted` folder:
+        *   `YYYY-MM-DD_HH-MM-SS.tcx` (Strava-compatible TCX)
+        *   `YYYY-MM-DD_HH-MM-SS.fit` (Strava-compatible FIT)
+    *   Original file is moved to `processed`.
     *   The original file is moved to `processed`.
     *   **Progress**: You will see a real-time progress percentage in the terminal.
     *   **Summary**: After conversion, a summary of the ride (Distance, Duration, Elevation) is displayed.

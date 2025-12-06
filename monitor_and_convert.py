@@ -4,12 +4,15 @@ import shutil
 import sys
 import datetime
 from convert_pwx_to_tcx import convert_pwx_to_tcx
-# try:
-#     from convert_pwx_to_fit import convert_pwx_to_fit
-# except ImportError:
-#     print("Error: Missing required library 'fit_tool'.")
-#     print("Please install it by running: pip install fit_tool")
-#     sys.exit(1)
+
+# Optional FIT support
+try:
+    from convert_pwx_to_fit import convert_pwx_to_fit
+    FIT_SUPPORT_ENABLED = True
+except ImportError:
+    FIT_SUPPORT_ENABLED = False
+    print("Warning: 'fit_tool' library not found. FIT conversion will be disabled.")
+    print("To enable FIT support, run: pip install fit_tool")
 
 # Configuration
 BASE_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
@@ -34,37 +37,48 @@ def process_file(filename):
     # Input is now inside 'original'
     input_path = os.path.join(BASE_DIRECTORY, ORIGINAL_DIR_NAME, filename)
     
-    # Generate output filename
+    # Generate output filenames
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    output_filename = f"{timestamp}.tcx"
-    # Output goes to 'converted'
-    output_path = os.path.join(BASE_DIRECTORY, CONVERTED_DIR_NAME, output_filename)
+    tcx_filename = f"{timestamp}.tcx"
+    tcx_path = os.path.join(BASE_DIRECTORY, CONVERTED_DIR_NAME, tcx_filename)
     
     print(f"\nFound file: {filename}")
     print(f"Starting processing: {filename}...")
     sys.stdout.flush()
     
     try:
-        # Convert
-        convert_pwx_to_tcx(input_path, output_path)
+        # 1. Convert to TCX
+        convert_pwx_to_tcx(input_path, tcx_path)
+        print(f"  -> Generated TCX: converted/{tcx_filename}")
+
+        # 2. Convert to FIT (if enabled)
+        if FIT_SUPPORT_ENABLED:
+            fit_filename = f"{timestamp}.fit"
+            fit_path = os.path.join(BASE_DIRECTORY, CONVERTED_DIR_NAME, fit_filename)
+            try:
+                convert_pwx_to_fit(input_path, fit_path)
+                print(f"  -> Generated FIT: converted/{fit_filename}")
+            except Exception as e:
+                print(f"  -> FIT Conversion Failed: {e}")
+        else:
+            print("  -> FIT conversion skipped (library missing)")
         
         # Move original file to 'processed'
         processed_dest = os.path.join(BASE_DIRECTORY, PROCESSED_DIR_NAME, filename)
         shutil.move(input_path, processed_dest)
         print(f"Completed processing: {filename}")
-        print(f"  -> Converted to {CONVERTED_DIR_NAME}/{output_filename}")
-        print(f"  -> Moved original to {PROCESSED_DIR_NAME}/")
+        print(f"  -> Original moved to processed/")
         sys.stdout.flush()
         
     except Exception as e:
         print(f"  -> FAILED: {e}")
-        # Move to failed directory to avoid infinite loops (though less likely now that we watch a separate dir)
-        failed_dest = os.path.join(BASE_DIRECTORY, FAILED_DIR_NAME, filename)
+        # Move failed file to 'failed'
         try:
+            failed_dest = os.path.join(BASE_DIRECTORY, FAILED_DIR_NAME, filename)
             shutil.move(input_path, failed_dest)
-            print(f"  -> Moved to {FAILED_DIR_NAME}/")
-        except Exception as move_error:
-            print(f"  -> CRITICAL: Could not move failed file: {move_error}")
+            print(f"  -> Moved original to failed/")
+        except Exception as move_err:
+            print(f"  -> CRITICAL: Could not move failed file: {move_err}")
 
 def monitor_directory():
     """Main monitoring loop."""
