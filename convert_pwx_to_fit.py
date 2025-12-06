@@ -47,7 +47,7 @@ def convert_pwx_to_fit(pwx_file_path, fit_file_path):
     file_id = FileIdMessage()
     file_id.type = FileType.ACTIVITY
     file_id.manufacturer = Manufacturer.GARMIN
-    file_id.product = 20119  # Matches Garmin Edge 500 (from good TCX)
+    file_id.product = 3121  # Garmin Edge 530 (from working reference file)
     file_id.serial_number = 12345
     file_id.time_created = round(start_time.timestamp() * 1000)
     builder.add(file_id)
