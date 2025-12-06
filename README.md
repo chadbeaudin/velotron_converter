@@ -6,15 +6,10 @@ This utility monitors a directory for RacerMate Velotron `.pwx` files and automa
 
 ### Prerequisites
 - Python 3.x
-- `pip install fit_tool` installed.
 
 1.  Ensure you have Python 3 installed.
 2.  Install dependencies:
-    ```bash
-    pip install -r requirements.txt
-    # (or just ensure standard library modules are available: xml, datetime, os, shutil, sys)
-    # The current script uses only standard libraries.
-    ```
+    *   No external dependencies are required (uses standard libraries only).
 
 ## Usage
 
@@ -43,3 +38,9 @@ This utility monitors a directory for RacerMate Velotron `.pwx` files and automa
 ## Output Filenames
 
 Converted files are named using the timestamp of conversion (e.g., `2025-12-05_17-00-00.tcx`) to ensure uniqueness.
+
+## Technical Details
+
+To ensure Strava correctly reads elevation data from indoor rides:
+1.  **No Position Data**: The TCX file intentionally omits GPS `Position` tags. If present (even as 0,0), Strava overwrites device elevation with map elevation (sea level).
+2.  **Device Spoofing**: The converter adds metadata mimicking a "Garmin TCX with Barometer". This encourages Strava to trust the elevation data in the file.
