@@ -29,7 +29,7 @@ def convert_pwx_to_fit(pwx_file_path, fit_file_path):
     # 1. File ID
     file_id = FileIdMessage()
     file_id.type = FileType.ACTIVITY
-    file_id.manufacturer = Manufacturer.DEVELOPMENT
+    file_id.manufacturer = Manufacturer.GARMIN
     file_id.product = 0
     file_id.serial_number = 12345
     file_id.time_created = round(start_time.timestamp() * 1000)
@@ -66,9 +66,10 @@ def convert_pwx_to_fit(pwx_file_path, fit_file_path):
         record = RecordMessage()
         record.timestamp = timestamp_ms
         
-        # Position (FIX for Strava)
-        record.position_lat = 0 # 0 degrees
-        record.position_long = 0 # 0 degrees
+        # Position: Use valid static coordinates (from reference file) to satisfy Strava
+        # Note: fit_tool handles degree->semicircle conversion if we pass floats
+        record.position_lat = 39.0399566385895
+        record.position_long = -104.59640812128782
 
         # Distance
         dist_node = sample.find('pwx:dist', ns_pwx)
@@ -80,8 +81,10 @@ def convert_pwx_to_fit(pwx_file_path, fit_file_path):
         # Altitude
         alt_node = sample.find('pwx:alt', ns_pwx)
         if alt_node is not None:
-            alt = float(alt_node.text)
-            record.altitude = alt    # meters
+            # Add 1000m offset because strava might ignore 0-ish elevation
+            alt = float(alt_node.text) + 1000.0 
+            record.altitude = alt           # legacy field
+            record.enhanced_altitude = alt  # High precision field
             if prev_alt is not None:
                 diff = alt - prev_alt
                 if diff > 0:
@@ -141,7 +144,7 @@ def convert_pwx_to_fit(pwx_file_path, fit_file_path):
     session.max_speed = max_speed
     session.total_ascent = total_ascent
     session.sport = Sport.CYCLING
-    session.sub_sport = SubSport.GENERIC
+    session.sub_sport = SubSport.INDOOR_CYCLING
     session.first_lap_index = 0
     session.num_laps = 1
     builder.add(session)
