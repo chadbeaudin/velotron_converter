@@ -37,9 +37,36 @@ def process_file(filename):
     # Input is now inside 'original'
     input_path = os.path.join(BASE_DIRECTORY, ORIGINAL_DIR_NAME, filename)
     
-    # Generate output filenames
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    tcx_filename = f"{timestamp}.tcx"
+    # Extract ride timestamp from PWX file for filename
+    try:
+        import xml.etree.ElementTree as ET
+        tree = ET.parse(input_path)
+        root = tree.getroot()
+        
+        # Handle namespaced PWX
+        if '}' in root.tag:
+            ns_url = root.tag.split('}')[0].strip('{')
+            ns = {'pwx': ns_url}
+            workout = root.find('pwx:workout', ns)
+            time_node = workout.find('pwx:time', ns) if workout is not None else None
+        else:
+            workout = root.find('workout')
+            time_node = workout.find('time') if workout is not None else None
+        
+        if time_node is not None and time_node.text:
+            # Parse timestamp: 2025-11-18T14:29:43 -> 2025-11-18_14-29-43
+            ride_time_str = time_node.text.split('.')[0]  # Remove fractional seconds if present
+            ride_time = datetime.datetime.fromisoformat(ride_time_str)
+            base_name = ride_time.strftime("%Y-%m-%d_%H-%M-%S")
+        else:
+            # Fallback to original filename if parsing fails
+            base_name = os.path.splitext(filename)[0]
+    except Exception as e:
+        # Fallback to original filename on any error
+        print(f"  -> Warning: Could not parse ride time, using original filename: {e}")
+        base_name = os.path.splitext(filename)[0]
+    
+    tcx_filename = f"{base_name}.tcx"
     tcx_path = os.path.join(BASE_DIRECTORY, CONVERTED_DIR_NAME, tcx_filename)
     
     print(f"\nFound file: {filename}")
@@ -53,7 +80,7 @@ def process_file(filename):
 
         # 2. Convert to FIT (if enabled)
         if FIT_SUPPORT_ENABLED:
-            fit_filename = f"{timestamp}.fit"
+            fit_filename = f"{base_name}.fit"
             fit_path = os.path.join(BASE_DIRECTORY, CONVERTED_DIR_NAME, fit_filename)
             try:
                 convert_pwx_to_fit(input_path, fit_path)

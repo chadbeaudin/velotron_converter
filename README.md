@@ -43,7 +43,7 @@ This utility monitors a directory for RacerMate Velotron `.pwx` files and automa
 
 ## Output Filenames
 
-Converted files are named using the timestamp of conversion (e.g., `2025-12-05_17-00-00.tcx`) to ensure uniqueness.
+Converted files are named using the ride's timestamp from the PWX file (e.g., `2025-11-18_14-29-43.tcx` and `2025-11-18_14-29-43.fit`).
 
 ## Technical Details
 
