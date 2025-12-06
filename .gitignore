@@ -1,6 +1,7 @@
 converted/
 failed/
 original/
+processed/
 *.tcx
 __pycache__/
 *.DS_Store
