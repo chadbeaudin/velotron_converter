@@ -6,7 +6,7 @@ import datetime
 from convert_pwx_to_tcx import convert_pwx_to_tcx
 
 # Configuration
-BASE_DIRECTORY = os.getcwd()
+BASE_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 ORIGINAL_DIR_NAME = "original"
 CONVERTED_DIR_NAME = "converted"
 PROCESSED_DIR_NAME = "processed"
@@ -34,7 +34,9 @@ def process_file(filename):
     # Output goes to 'converted'
     output_path = os.path.join(BASE_DIRECTORY, CONVERTED_DIR_NAME, output_filename)
     
-    print(f"Processing: {filename}...")
+    print(f"\nFound file: {filename}")
+    print(f"Starting processing: {filename}...")
+    sys.stdout.flush()
     
     try:
         # Convert
@@ -43,8 +45,10 @@ def process_file(filename):
         # Move original file to 'processed'
         processed_dest = os.path.join(BASE_DIRECTORY, PROCESSED_DIR_NAME, filename)
         shutil.move(input_path, processed_dest)
+        print(f"Completed processing: {filename}")
         print(f"  -> Converted to {CONVERTED_DIR_NAME}/{output_filename}")
         print(f"  -> Moved original to {PROCESSED_DIR_NAME}/")
+        sys.stdout.flush()
         
     except Exception as e:
         print(f"  -> FAILED: {e}")
@@ -61,8 +65,10 @@ def monitor_directory():
     watch_dir = os.path.join(BASE_DIRECTORY, ORIGINAL_DIR_NAME)
     
     print(f"Monitoring directory: {watch_dir}")
+    print(f"Current Working Directory: {os.getcwd()}")
     print(f"Place PWX files in '{ORIGINAL_DIR_NAME}' folder to convert them.")
     print(f"Press Ctrl+C to stop.")
+    sys.stdout.flush()
     
     setup_directories()
     

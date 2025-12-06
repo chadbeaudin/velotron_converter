@@ -73,10 +73,21 @@ def convert_pwx_to_tcx(input_file, output_file):
     track = ET.SubElement(lap, "Track")
 
     samples = workout_node.findall('pwx:sample', ns_pwx)
+    total_samples = len(samples)
     
     max_dist = 0.0
+    total_elevation_gain_m = 0.0
+    previous_alt = None
     
-    for sample in samples:
+    print(f"Converting {total_samples} samples...")
+    
+    for i, sample in enumerate(samples):
+        # Progress update every 10%
+        if total_samples > 0 and i % (total_samples // 10 if total_samples >= 10 else 1) == 0:
+            percent = int((i / total_samples) * 100)
+            sys.stdout.write(f"\rProgress: {percent}%")
+            sys.stdout.flush()
+
         trackpoint = ET.SubElement(track, "Trackpoint")
         
         # Time
@@ -90,7 +101,7 @@ def convert_pwx_to_tcx(input_file, output_file):
             hr_val = hr_node.text
             hr_elm = ET.SubElement(trackpoint, "HeartRateBpm")
             ET.SubElement(hr_elm, "Value").text = hr_val
-
+            
         # Cadence
         cad_node = sample.find('pwx:cad', ns_pwx)
         if cad_node is not None:
@@ -107,7 +118,14 @@ def convert_pwx_to_tcx(input_file, output_file):
         # Altitude (optional)
         alt_node = sample.find('pwx:alt', ns_pwx)
         if alt_node is not None:
+             alt_val = float(alt_node.text)
              ET.SubElement(trackpoint, "AltitudeMeters").text = alt_node.text
+             
+             if previous_alt is not None:
+                 delta = alt_val - previous_alt
+                 if delta > 0:
+                     total_elevation_gain_m += delta
+             previous_alt = alt_val
              
         # Power (Extension)
         pwr_node = sample.find('pwx:pwr', ns_pwx)
@@ -121,9 +139,36 @@ def convert_pwx_to_tcx(input_file, output_file):
             spd_node = sample.find('pwx:spd', ns_pwx)
             if spd_node is not None:
                  ET.SubElement(tpx, f"{{{tpx_ns}}}Speed").text = spd_node.text
+    
+    # Final progress update
+    sys.stdout.write(f"\rProgress: 100%\n")
+    sys.stdout.flush()
 
     # Update Lap Distance
     lap.find("DistanceMeters").text = f"{max_dist:.2f}"
+
+    # Calculate Summary Stats
+    dist_miles = max_dist * 0.000621371
+    elevation_feet = total_elevation_gain_m * 3.28084
+    
+    # Duration formatting (total_time is already extracted if available, otherwise from last sample)
+    if total_time == 0 and len(samples) > 0:
+         # Try to estimate from last sample time offset if not in summary
+         last_sample = samples[-1]
+         last_offset = float(last_sample.find('pwx:timeoffset', ns_pwx).text)
+         total_time = last_offset
+
+    if total_time > 0:
+        duration = str(datetime.timedelta(seconds=int(total_time)))
+    else:
+        duration = "Unknown"
+
+    print("\nConversion Summary:")
+    print("-" * 20)
+    print(f"Distance:  {dist_miles:.2f} miles")
+    print(f"Duration:  {duration}")
+    print(f"Elevation: {elevation_feet:.0f} feet")
+    print("-" * 20 + "\n")
 
     # Write to file
     tree = ET.ElementTree(tcx_root)

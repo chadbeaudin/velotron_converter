@@ -24,6 +24,8 @@ This utility monitors a directory for RacerMate Velotron `.pwx` files and automa
     *   Drop your `.pwx` files into the `original` folder.
     *   The script will detect the file, convert it, and place the result in the `converted` folder.
     *   The original file is moved to `processed`.
+    *   **Progress**: You will see a real-time progress percentage in the terminal.
+    *   **Summary**: After conversion, a summary of the ride (Distance, Duration, Elevation) is displayed.
 
 ## Directory Structure
 
