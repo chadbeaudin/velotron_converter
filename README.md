@@ -17,10 +17,18 @@ This utility monitors a directory for RacerMate Velotron `.pwx` files and automa
 ## Usage
 
 1.  **Start the Monitor**:
-    Open your terminal and run:
+    
+    **Default mode** (uses script's directory):
     ```bash
     python3 monitor_and_convert.py
     ```
+    
+    **Custom directory mode**:
+    ```bash
+    python3 monitor_and_convert.py /path/to/your/directory
+    ```
+    
+    The script will create/use `original/`, `converted/`, `processed/`, and `failed/` subdirectories in the specified location.
 
 2.  **Convert Files**:
     *   Drop your `.pwx` files into the `original` folder.

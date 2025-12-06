@@ -3,6 +3,7 @@ import time
 import shutil
 import sys
 import datetime
+import argparse
 from convert_pwx_to_tcx import convert_pwx_to_tcx
 
 # Optional FIT support
@@ -14,8 +15,18 @@ except ImportError:
     print("Warning: 'fit_tool' library not found. FIT conversion will be disabled.")
     print("To enable FIT support, run: pip install fit_tool")
 
+# Parse command-line arguments
+parser = argparse.ArgumentParser(description='Monitor and convert PWX files to TCX/FIT formats')
+parser.add_argument('directory', nargs='?', default=None, 
+                    help='Base directory containing original/ folder (default: script location)')
+args = parser.parse_args()
+
 # Configuration
-BASE_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+if args.directory:
+    BASE_DIRECTORY = os.path.abspath(args.directory)
+else:
+    BASE_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+
 ORIGINAL_DIR_NAME = "original"
 CONVERTED_DIR_NAME = "converted"
 PROCESSED_DIR_NAME = "processed"
