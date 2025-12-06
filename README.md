@@ -4,6 +4,10 @@ This utility monitors a directory for RacerMate Velotron `.pwx` files and automa
 
 ## Setup
 
+### Prerequisites
+- Python 3.x
+- `pip install fit_tool` installed.
+
 1.  Ensure you have Python 3 installed.
 2.  Install dependencies:
     ```bash

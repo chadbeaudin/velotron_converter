@@ -90,33 +90,27 @@ def convert_pwx_to_tcx(input_file, output_file):
 
         trackpoint = ET.SubElement(track, "Trackpoint")
         
-        # Time
+        # 1. Time (Must be first)
         time_offset = float(sample.find('pwx:timeoffset', ns_pwx).text)
         tp_time = start_time + datetime.timedelta(seconds=time_offset)
         ET.SubElement(trackpoint, "Time").text = tp_time.isoformat()
         
-        # Heart Rate
-        hr_node = sample.find('pwx:hr', ns_pwx)
-        if hr_node is not None:
-            hr_val = hr_node.text
-            hr_elm = ET.SubElement(trackpoint, "HeartRateBpm")
-            ET.SubElement(hr_elm, "Value").text = hr_val
-            
-        # Cadence
-        cad_node = sample.find('pwx:cad', ns_pwx)
-        if cad_node is not None:
-            ET.SubElement(trackpoint, "Cadence").text = cad_node.text
-
-        # Distance
-        dist_node = sample.find('pwx:dist', ns_pwx)
-        if dist_node is not None:
-            dist_val = float(dist_node.text)
-            ET.SubElement(trackpoint, "DistanceMeters").text = f"{dist_val:.2f}"
-            if dist_val > max_dist:
-                max_dist = dist_val
-
-        # Altitude (optional)
+        # Extract all potential values first
         alt_node = sample.find('pwx:alt', ns_pwx)
+        dist_node = sample.find('pwx:dist', ns_pwx)
+        hr_node = sample.find('pwx:hr', ns_pwx)
+        cad_node = sample.find('pwx:cad', ns_pwx)
+        pwr_node = sample.find('pwx:pwr', ns_pwx)
+        spd_node = sample.find('pwx:spd', ns_pwx)
+
+        # 2. Position (Added for Strava compatibility)
+        # Strava often ignores altitude if no GPS data is present.
+        # We provide a static (0,0) position.
+        position = ET.SubElement(trackpoint, "Position")
+        ET.SubElement(position, "LatitudeDegrees").text = "0.0"
+        ET.SubElement(position, "LongitudeDegrees").text = "0.0"
+
+        # 3. AltitudeMeters (Must be before Distance, HR, Cadence)
         if alt_node is not None:
              alt_val = float(alt_node.text)
              ET.SubElement(trackpoint, "AltitudeMeters").text = alt_node.text
@@ -126,17 +120,32 @@ def convert_pwx_to_tcx(input_file, output_file):
                  if delta > 0:
                      total_elevation_gain_m += delta
              previous_alt = alt_val
-             
-        # Power (Extension)
-        pwr_node = sample.find('pwx:pwr', ns_pwx)
-        if pwr_node is not None:
+
+        # 4. DistanceMeters
+        if dist_node is not None:
+            dist_val = float(dist_node.text)
+            ET.SubElement(trackpoint, "DistanceMeters").text = f"{dist_val:.2f}"
+            if dist_val > max_dist:
+                max_dist = dist_val
+
+        # 5. HeartRateBpm
+        if hr_node is not None:
+            hr_val = hr_node.text
+            hr_elm = ET.SubElement(trackpoint, "HeartRateBpm")
+            ET.SubElement(hr_elm, "Value").text = hr_val
+            
+        # 6. Cadence
+        if cad_node is not None:
+            ET.SubElement(trackpoint, "Cadence").text = cad_node.text
+
+        # 7. Extensions (Power, Speed)
+        if pwr_node is not None or spd_node is not None:
             extensions = ET.SubElement(trackpoint, "Extensions")
             tpx = ET.SubElement(extensions, f"{{{tpx_ns}}}TPX")
-            ET.SubElement(tpx, f"{{{tpx_ns}}}Watts").text = pwr_node.text
             
-            # Speed is also in TPX usually, or just implicit from distance/time. 
-            # Strava prefers speed in meters/second if provided.
-            spd_node = sample.find('pwx:spd', ns_pwx)
+            if pwr_node is not None:
+                ET.SubElement(tpx, f"{{{tpx_ns}}}Watts").text = pwr_node.text
+            
             if spd_node is not None:
                  ET.SubElement(tpx, f"{{{tpx_ns}}}Speed").text = spd_node.text
     
