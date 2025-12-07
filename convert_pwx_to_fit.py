@@ -94,11 +94,9 @@ def convert_pwx_to_fit(pwx_file_path, fit_file_path):
         record = RecordMessage()
         record.timestamp = timestamp_ms
         
-        # Position: Static GPS for graphing support
-        # Strava needs GPS data to display HR/power graphs over time.
-        # Using a static position in Colorado so graphs work while preserving elevation.
-        record.position_lat = int(40.0150 * ((2**32) / 360))  # Boulder, CO area (semicircles)
-        record.position_long = int(-105.2705 * ((2**32) / 360))
+        # Position: Removed due to encoding issues
+        # record.position_lat = int(40.0150 * (2**31 / 180))
+        # record.position_long = int(-105.2705 * (2**31 / 180))
 
         # Distance
         dist_node = sample.find('pwx:dist', ns_pwx)
@@ -172,7 +170,7 @@ def convert_pwx_to_fit(pwx_file_path, fit_file_path):
     session.max_speed = max_speed
     session.total_ascent = total_ascent
     session.sport = Sport.CYCLING
-    # session.sub_sport = SubSport.INDOOR_CYCLING  # Removed: prevents HR graphs in Strava
+    session.sub_sport = SubSport.INDOOR_CYCLING  # Removed: prevents HR graphs in Strava
     session.first_lap_index = 0
     session.num_laps = 1
     builder.add(session)

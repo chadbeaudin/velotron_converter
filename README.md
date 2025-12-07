@@ -56,7 +56,24 @@ Converted files are named using the ride's timestamp from the PWX file (e.g., `2
 ## Technical Details
 
 To ensure Strava correctly displays all data (elevation, HR graphs, power, etc.):
-1.  **Static GPS Coordinates**: Uses a fixed location (Boulder, CO) to enable Strava's time-series graphs while preserving barometric elevation data.
+1.  **Static GPS Coordinates**: TCX files use a fixed location (Boulder, CO) to enable Strava's time-series graphs while preserving barometric elevation data.
 2.  **Device Metadata**: Mimics a "Garmin Edge 530" device to ensure Strava trusts the elevation and sensor data.
 3.  **Timezone Handling**: Automatically adds local timezone info to timestamps so activities appear at the correct time in Strava.
-4.  **Sport Type**: Marked as regular cycling (not indoor) to enable full graph display in Strava.
+4.  **Indoor Cycling Flag**: Both formats are marked as indoor cycling activities.
+
+## Which Format Should I Upload?
+
+Both TCX and FIT files contain identical data. Choose based on your needs:
+
+**FIT Format (Recommended)**
+- ✅ Smaller file size (binary format)
+- ✅ Industry standard for fitness devices
+- ✅ Faster upload and processing
+- ✅ Native Garmin format
+
+**TCX Format**
+- ✅ Human-readable XML (easier to debug)
+- ✅ Includes static GPS for graph support
+- ✅ Widely compatible
+
+**Recommendation**: Use FIT files for normal uploads. Use TCX if you need to inspect the file contents or troubleshoot issues.

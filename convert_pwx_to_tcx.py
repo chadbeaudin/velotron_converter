@@ -62,6 +62,7 @@ def convert_pwx_to_tcx(input_file, output_file):
     activities = ET.SubElement(tcx_root, "Activities")
     activity = ET.SubElement(activities, "Activity", Sport="Biking")
     ET.SubElement(activity, "Id").text = start_time_str
+    ET.SubElement(activity, "Notes").text = "Indoor Cycling"
     
     # Creator metadata (copied from working sample to ensure Strava trusts elevation)
     creator = ET.SubElement(activity, "Creator")
