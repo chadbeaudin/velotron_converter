@@ -2,17 +2,29 @@
 
 This utility monitors a directory for RacerMate Velotron `.pwx` files and automatically converts them to Strava-compatible `.tcx` and `.fit` files.
 
+## Deployment Options
+
+- **Local Python**: Run directly on macOS/Linux/Windows
+- **Docker/Unraid**: Run as a containerized service (see [DOCKER.md](DOCKER.md))
+
 ## Setup
 
-### Prerequisites
+### Option 1: Local Python Installation
+
+**Prerequisites:**
 - Python 3.x
 - `pip install fit_tool` (Optional, required for `.fit` file generation)
 
+**Installation:**
 1.  Ensure you have Python 3 installed.
 2.  Install dependencies:
     ```bash
     pip install fit_tool
     ```
+
+### Option 2: Docker/Unraid
+
+See [DOCKER.md](DOCKER.md) for complete Docker deployment instructions.
 
 ## Usage
 
