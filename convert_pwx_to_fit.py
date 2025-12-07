@@ -42,6 +42,17 @@ def convert_pwx_to_fit(pwx_file_path, fit_file_path):
     except ValueError:
         # Try with fractional seconds
         start_time = datetime.datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%S.%f")
+    
+    # If no timezone info, assume it's local time and add timezone
+    if start_time.tzinfo is None:
+        import time as time_module
+        # Get local timezone offset
+        if time_module.daylight:
+            utc_offset = -time_module.altzone
+        else:
+            utc_offset = -time_module.timezone
+        tz = datetime.timezone(datetime.timedelta(seconds=utc_offset))
+        start_time = start_time.replace(tzinfo=tz)
 
     # 1. File ID
     file_id = FileIdMessage()

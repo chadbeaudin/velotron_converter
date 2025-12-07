@@ -27,7 +27,20 @@ def convert_pwx_to_tcx(input_file, output_file):
     
     start_time_str = time_node.text
     try:
+        # Parse the timestamp
         start_time = datetime.datetime.fromisoformat(start_time_str)
+        
+        # If no timezone info, assume it's local time and add timezone
+        if start_time.tzinfo is None:
+            import time as time_module
+            # Get local timezone offset
+            if time_module.daylight:
+                utc_offset = -time_module.altzone
+            else:
+                utc_offset = -time_module.timezone
+            tz = datetime.timezone(datetime.timedelta(seconds=utc_offset))
+            start_time = start_time.replace(tzinfo=tz)
+            
     except ValueError:
         # Fallback for formats that might not be strictly ISO
         print(f"Warning: Could not parse time '{start_time_str}' with fromisoformat.")
