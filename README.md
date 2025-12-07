@@ -1,6 +1,6 @@
 # Velotron to Strava Converter
 
-This utility monitors a directory for RacerMate Velotron `.pwx` files and automatically converts them to Strava-compatible `.tcx` files.
+This utility monitors a directory for RacerMate Velotron `.pwx` files and automatically converts them to Strava-compatible `.tcx` and `.fit` files.
 
 ## Setup
 
@@ -36,18 +36,18 @@ This utility monitors a directory for RacerMate Velotron `.pwx` files and automa
         *   `YYYY-MM-DD_HH-MM-SS.tcx` (Strava-compatible TCX)
         *   `YYYY-MM-DD_HH-MM-SS.fit` (Strava-compatible FIT)
     *   Original file is moved to `processed`.
-    *   The original file is moved to `processed`.
     *   **Progress**: You will see a real-time progress percentage in the terminal.
     *   **Summary**: After conversion, a summary of the ride (Distance, Duration, Elevation) is displayed.
 
 ## Directory Structure
 
 *   `original/`: **Inbox**. Place new files here.
-*   `converted/`: **Outbox**. Collect your converted `.tcx` files here.
+*   `converted/`: **Outbox**. Collect your converted `.tcx` and `.fit` files here.
 *   `processed/`: **Archive**. Source files are stored here after conversion.
 *   `failed/`: **Error**. Files that could not be converted are moved here.
 *   `monitor_and_convert.py`: The main script to run.
-*   `convert_pwx_to_tcx.py`: The underlying conversion logic.
+*   `convert_pwx_to_tcx.py`: TCX conversion logic.
+*   `convert_pwx_to_fit.py`: FIT conversion logic (requires `fit_tool`).
 
 ## Output Filenames
 
@@ -55,6 +55,8 @@ Converted files are named using the ride's timestamp from the PWX file (e.g., `2
 
 ## Technical Details
 
-To ensure Strava correctly reads elevation data from indoor rides:
-1.  **No Position Data**: The TCX file intentionally omits GPS `Position` tags. If present (even as 0,0), Strava overwrites device elevation with map elevation (sea level).
-2.  **Device Spoofing**: The converter adds metadata mimicking a "Garmin TCX with Barometer". This encourages Strava to trust the elevation data in the file.
+To ensure Strava correctly displays all data (elevation, HR graphs, power, etc.):
+1.  **Static GPS Coordinates**: Uses a fixed location (Boulder, CO) to enable Strava's time-series graphs while preserving barometric elevation data.
+2.  **Device Metadata**: Mimics a "Garmin Edge 530" device to ensure Strava trusts the elevation and sensor data.
+3.  **Timezone Handling**: Automatically adds local timezone info to timestamps so activities appear at the correct time in Strava.
+4.  **Sport Type**: Marked as regular cycling (not indoor) to enable full graph display in Strava.

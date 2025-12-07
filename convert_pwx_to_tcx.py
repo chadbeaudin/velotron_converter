@@ -128,8 +128,12 @@ def convert_pwx_to_tcx(input_file, output_file):
         pwr_node = sample.find('pwx:pwr', ns_pwx)
         spd_node = sample.find('pwx:spd', ns_pwx)
 
-        # 2. Position (Removed: Strava overwrites elevation if 0,0 is provided)
-        # We provide no position so Strava respects device altitude.
+        # 2. Position (Static GPS for graphing support)
+        # Strava needs GPS data to display HR/power graphs over time.
+        # Using a static position in Colorado so graphs work while preserving elevation.
+        position = ET.SubElement(trackpoint, "Position")
+        ET.SubElement(position, "LatitudeDegrees").text = "40.0150"  # Boulder, CO area
+        ET.SubElement(position, "LongitudeDegrees").text = "-105.2705"
 
         # 3. AltitudeMeters (Must be before Distance, HR, Cadence)
         if alt_node is not None:
