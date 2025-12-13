@@ -89,3 +89,38 @@ Both TCX and FIT files contain identical data. Choose based on your needs:
 - ✅ Widely compatible
 
 **Recommendation**: Use FIT files for normal uploads. Use TCX if you need to inspect the file contents or troubleshoot issues.
+
+# velotron_converter
+
+This repository contains the velotron-converter Docker image and (optionally) an Unraid Community Applications template.
+
+## Add this repo to Unraid (Community Applications)
+
+1. Ensure a template file exists in this repository at:
+   - `templates/velotron-converter.xml`
+   - If you don't have one yet, create `templates/velotron-converter.xml` with the container metadata (image: `bigtimber/velotron-converter`).
+
+2. Push the repository to GitHub (it must be public or accessible to your Unraid server).
+
+3. On your Unraid server:
+   - Open the Web UI → Apps (Community Applications).
+   - Click the three-dot menu (Manage Repositories / Add Repository).
+   - Paste the GitHub repository URL for this project, for example:
+     `https://github.com/<your-github-username>/velotron_converter`
+   - Click Add / OK and allow Community Applications to refresh the repo index.
+
+4. Search for `velotron-converter` in Community Applications and install the template.
+
+## Quick notes / troubleshooting
+- The template must live in the repository under `templates/*.xml` for Community Applications to find it.
+- Make sure the template's `<Repository>` (image) matches `bigtimber/velotron-converter`.
+- If the app does not appear:
+  - Refresh the Community Applications repositories.
+  - Verify the repo is public.
+  - Confirm the template file path is `templates/velotron-converter.xml`.
+  - Check CA logs for errors.
+
+## Example template location (in this repo)
+- `templates/velotron-converter.xml`
+
+That's it — after adding the repository in Community Applications, the app should appear in the Apps search and be installable on your Unraid server.
