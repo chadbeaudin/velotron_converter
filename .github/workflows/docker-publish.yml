@@ -69,6 +69,21 @@ jobs:
             exit 1
           fi
 
+      - name: Validate DockerHub token (quick check)
+        run: |
+          set -e
+          echo "Attempting docker login with provided credentials..."
+          # try to login using the token; fail with a clear message if scopes/credentials are invalid
+          if ! echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin; then
+            echo "ERROR: Docker login failed. Common causes:" >&2
+            echo "  - DOCKERHUB_USERNAME is not your Docker ID" >&2
+            echo "  - DOCKERHUB_TOKEN is not a personal access token or lacks 'Read & Write' scope" >&2
+            echo "  - Token is restricted to different repositories/organization" >&2
+            echo "Create a new token with 'Read & Write' (or 'Read, Write, Delete' if needed) at: https://hub.docker.com/settings/security" >&2
+            exit 1
+          fi
+          docker logout
+
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
