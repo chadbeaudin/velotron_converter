@@ -10,8 +10,8 @@ services:
       # Example: /mnt/user/appdata/velotron:/data
       - ./data:/data
     environment:
-      - TZ=America/Denver  # Set your timezone
+      - TZ=America/Denver # Set your timezone
     labels:
       - "com.unraid.docker.managed=true"
       - "com.unraid.docker.webui=false"
-      - "com.unraid.docker.icon=https://raw.githubusercontent.com/docker-library/docs/master/python/logo.png"
+      - "com.unraid.docker.icon=/data/logo.png"

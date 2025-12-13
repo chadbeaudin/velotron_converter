@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<Container>
+  <Name>velotron-converter</Name>
+  <Repository>chadbeaudin/velotron-converter:latest</Repository>
+  <Registry>dockerhub</Registry>
+  <Network>bridge</Network>
+  <Project>https://github.com/chadbeaudin/velotron_converter</Project>
+  <Overview>Monitors Velotron .pwx files and converts to .tcx/.fit</Overview>
+  <Description>Monitors /data/original (host /mnt/user/dropBox/original) and converts .pwx files to Strava-compatible .tcx and .fit files.</Description>
+
+  <Config>
+    <Env>
+      <Name>TZ</Name>
+      <Value>America/Denver</Value>
+      <Mode>rw</Mode>
+      <Description>Timezone</Description>
+    </Env>
+
+    <Volume>
+      <Name>dropBox</Name>
+      <ContainerDir>/data</ContainerDir>
+      <HostDir>/mnt/user/dropBox</HostDir>
+      <Mode>rw</Mode>
+    </Volume>
+
+    <Volume>
+      <Name>appdata</Name>
+      <ContainerDir>/app</ContainerDir>
+      <HostDir>/mnt/user/appdata/velotron_converter</HostDir>
+      <Mode>rw</Mode>
+    </Volume>
+
+    <Label>
+      <Name>com.unraid.docker.managed</Name>
+      <Value>true</Value>
+    </Label>
+    <Label>
+      <Name>com.unraid.docker.webui</Name>
+      <Value>false</Value>
+    </Label>
+    <Label>
+      <Name>com.unraid.docker.icon</Name>
+      <Value>/usr/share/velotron/logo.png</Value>
+    </Label>
+  </Config>
+
+  <Extra>
+    <Display>
+      <Icon>https://raw.githubusercontent.com/chadbeaudin/velotron_converter/main/logo.png</Icon>
+      <DockerHub>chadbeaudin/velotron-converter</DockerHub>
+    </Display>
+    <Maintainer>https://github.com/chadbeaudin/velotron_converter</Maintainer>
+  </Extra>
+</Container>
