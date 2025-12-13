@@ -48,6 +48,7 @@ jobs:
             docker.io/chadbeaudin/velotron-converter:${{ steps.meta.outputs.SHORT_COMMIT }}
           build-args: |
             TZ=America/Denver
+            LOGO_FILE=logo.png
 
       - name: Image info
         run: docker manifest inspect docker.io/chadbeaudin/velotron-converter:latest || true
