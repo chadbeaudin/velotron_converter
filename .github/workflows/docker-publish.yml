@@ -84,6 +84,29 @@ jobs:
           fi
           docker logout
 
+      - name: Diagnostic: check repository access on Docker Hub
+        run: |
+          set -e
+          REPO="bigtimber/velotron-converter"
+          echo "Checking Docker Hub API access for repo: $REPO"
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -u "${{ secrets.DOCKERHUB_USERNAME }}:${{ secrets.DOCKERHUB_TOKEN }}" "https://hub.docker.com/v2/repositories/${REPO}/")
+          echo "Docker Hub API response status: $HTTP_STATUS"
+          if [ "$HTTP_STATUS" -eq 200 ]; then
+            echo "Repository exists and is accessible with the provided token."
+          elif [ "$HTTP_STATUS" -eq 404 ]; then
+            echo "Repository not found (404)."
+            echo "  - Confirm DOCKERHUB_USERNAME is your Docker ID (not GitHub username)." >&2
+            echo "  - If repo does not exist, either create it on Docker Hub or allow your token to create repos." >&2
+            exit 1
+          elif [ "$HTTP_STATUS" -eq 401 ] || [ "$HTTP_STATUS" -eq 403 ]; then
+            echo "Unauthorized (401/403). The token likely lacks access to this repository." >&2
+            echo "  - When creating the token, choose 'Read & Write' and set Access to 'All repositories' or explicitly include this repo." >&2
+            echo "  - If pushing to an organization, ensure token belongs to that org or has org repo access." >&2
+            exit 1
+          else
+            echo "Unexpected Docker Hub API response: $HTTP_STATUS" >&2
+          fi
+
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
@@ -105,12 +128,12 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: |
-            docker.io/chadbeaudin/velotron-converter:latest
-            docker.io/chadbeaudin/velotron-converter:${{ steps.meta.outputs.SHORT_COMMIT }}
-            docker.io/chadbeaudin/velotron-converter:${{ steps.meta.outputs.TAG_NAME }}
+            docker.io/bigtimber/velotron-converter:latest
+            docker.io/bigtimber/velotron-converter:${{ steps.meta.outputs.SHORT_COMMIT }}
+            docker.io/bigtimber/velotron-converter:${{ steps.meta.outputs.TAG_NAME }}
           build-args: |
             TZ=America/Denver
             LOGO_FILE=logo.png
 
       - name: Image info
-        run: docker manifest inspect docker.io/chadbeaudin/velotron-converter:latest || true
+        run: docker manifest inspect docker.io/bigtimber/velotron-converter:latest || true
