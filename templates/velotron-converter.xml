@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<Container>
+  <Name>velotron-converter</Name>
+  <Repository>bigtimber/velotron-converter</Repository>
+  <Registry>docker.io</Registry>
+  <Overview>Automated converter for Velotron files (pwx → tcx/fit)</Overview>
+  <Description>Monitors a host-mounted directory and converts Velotron files to TCX/FIT. Configure a host path for /data.</Description>
+  <Project>https://github.com/yourusername/velotron_converter</Project>
+  <Support>https://github.com/yourusername/velotron_converter/issues</Support>
+  <Network>bridge</Network>
+
+  <Map>
+    <Name>data</Name>
+    <ContainerPath>/data</ContainerPath>
+    <HostPath>/mnt/user/appdata/velotron</HostPath>
+    <Mode>rw</Mode>
+  </Map>
+
+  <Environment>
+    <Variable>
+      <Name>BASE_DIRECTORY</Name>
+      <Value>/data</Value>
+      <Description>Base directory inside the container</Description>
+    </Variable>
+  </Environment>
+
+  <WebUI>
+    <Port>none</Port>
+  </WebUI>
+
+  <ChangeLog>
+    <entry version="1.0">Initial template</entry>
+  </ChangeLog>
+</Container>
