@@ -1,8 +1,8 @@
 name: Build and publish Docker image
 
 on:
-  push:           # run on every push (all branches)
-  pull_request:   # run tests on PRs
+  push: {}
+  pull_request: {}
   release:
     types: [published]
   workflow_dispatch:
@@ -47,7 +47,8 @@ jobs:
   build-and-push:
     needs: test
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'   # only publish on pushes, not PRs
+    # only publish on pushes, not PRs
+    if: "github.event_name == 'push'"
     permissions:
       contents: read
     steps:
@@ -84,7 +85,7 @@ jobs:
           fi
           docker logout
 
-      - name: Diagnostic: check repository access on Docker Hub
+      - name: "Diagnostic: check repository access on Docker Hub"
         run: |
           set -e
           REPO="bigtimber/velotron-converter"
