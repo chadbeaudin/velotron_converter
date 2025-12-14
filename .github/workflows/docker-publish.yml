@@ -165,13 +165,6 @@ jobs:
           git commit -m "chore: update Community Applications template for ${TAG}" || echo "No changes to commit"
           git push origin HEAD:${GITHUB_REF_NAME:-main} || git push
 
-      - name: Extract version / tag
-        id: meta
-        run: |
-          echo "SHORT_COMMIT=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-          TAG=${GITHUB_REF##*/}
-          echo "TAG_NAME=${TAG}" >> $GITHUB_OUTPUT
-
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
