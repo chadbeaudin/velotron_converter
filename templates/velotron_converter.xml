@@ -44,9 +44,10 @@
     </Label>
   </Config>
 
+  <Icon>https://raw.githubusercontent.com/chadbeaudin/velotron_converter/master/logo.png</Icon>
+
   <Extra>
     <Display>
-      <Icon>https://raw.githubusercontent.com/chadbeaudin/velotron_converter/main/logo.png</Icon>
       <DockerHub>chadbeaudin/velotron-converter</DockerHub>
     </Display>
     <Maintainer>https://github.com/chadbeaudin/velotron_converter</Maintainer>
