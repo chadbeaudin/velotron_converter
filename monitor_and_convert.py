@@ -24,6 +24,8 @@ args = parser.parse_args()
 # Configuration
 if args.directory:
     BASE_DIRECTORY = os.path.abspath(args.directory)
+elif os.getenv('BASE_DIRECTORY'):
+    BASE_DIRECTORY = os.path.abspath(os.getenv('BASE_DIRECTORY'))
 else:
     BASE_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 
@@ -146,8 +148,4 @@ def monitor_directory():
         print("\nStopping monitor.")
 
 if __name__ == "__main__":
-    # Allow overriding base directory via argument
-    if len(sys.argv) > 1:
-        BASE_DIRECTORY = sys.argv[1]
-        
     monitor_directory()

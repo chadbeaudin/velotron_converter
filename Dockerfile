@@ -27,4 +27,5 @@ RUN mkdir -p /data/original /data/converted /data/processed /data/failed
 ENV BASE_DIRECTORY=/data
 
 # Run the monitor script
-CMD ["python", "-u", "monitor_and_convert.py", "/data"]
+# Run the monitor script
+CMD ["python", "-u", "monitor_and_convert.py"]
