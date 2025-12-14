@@ -43,7 +43,7 @@ def setup_directories():
         path = os.path.join(BASE_DIRECTORY, dir_name)
         if not os.path.exists(path):
             os.makedirs(path)
-            print(f"Created directory: {path}")
+            print(f"Existing directory not found.  Created directory: {path}")
         else:
             print(f"Directory already exists, using existing directory: {path}")
 
@@ -126,10 +126,10 @@ def monitor_directory():
     """Main monitoring loop."""
     watch_dir = os.path.join(BASE_DIRECTORY, ORIGINAL_DIR_NAME)
     
-    print(f"Velotron Converter Version: {os.getenv('APP_VERSION', 'unknown')}")
+    print(f"\nVelotron Converter Version: {os.getenv('APP_VERSION', 'unknown')} \n\n")
     print(f"Monitoring directory: {watch_dir}")
     print(f"Place PWX files in the '{watch_dir}' folder to convert them to TCX and FIT.")
-    print(f"Press Ctrl+C to stop.")
+    #print(f"Press Ctrl+C to stop.")
     sys.stdout.flush()
     
     setup_directories()
@@ -150,3 +150,5 @@ def monitor_directory():
 
 if __name__ == "__main__":
     monitor_directory()
+
+print(f"Press Ctrl+C to stop.")

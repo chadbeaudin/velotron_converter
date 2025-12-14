@@ -9,26 +9,13 @@
   <Description>Monitors /data/original (host /mnt/user/dropBox/original) and converts .pwx files to Strava-compatible .tcx and .fit files.</Description>
 
   <Config>
-    <Env>
-      <Name>TZ</Name>
-      <Value>America/Denver</Value>
-      <Mode>rw</Mode>
-      <Description>Timezone</Description>
-    </Env>
+    <Config Name="Monitor Directory" Target="/data" Default="/mnt/user/dropBox" Mode="rw" Description="Directory where PWX files are dropped (Host Path)" Type="Path" Display="always" Required="true" Mask="false"/>
+    
+    <Config Name="App Data Directory" Target="/app" Default="/mnt/user/appdata/velotron_converter" Mode="rw" Description="Directory for application data" Type="Path" Display="advanced" Required="true" Mask="false"/>
 
-    <Volume>
-      <Name>dropBox</Name>
-      <ContainerDir>/data</ContainerDir>
-      <HostDir>/mnt/user/dropBox</HostDir>
-      <Mode>rw</Mode>
-    </Volume>
+    <Config Name="Base Directory (Internal)" Target="BASE_DIRECTORY" Default="/data" Mode="" Description="Internal container path (Validation: Must match Container Path of Monitor Directory)" Type="Variable" Display="advanced" Required="true" Mask="false"/>
 
-    <Volume>
-      <Name>appdata</Name>
-      <ContainerDir>/app</ContainerDir>
-      <HostDir>/mnt/user/appdata/velotron_converter</HostDir>
-      <Mode>rw</Mode>
-    </Volume>
+    <Config Name="Timezone" Target="TZ" Default="America/Denver" Mode="" Description="Container Timezone" Type="Variable" Display="always" Required="false" Mask="false"/>
 
     <Label>
       <Name>com.unraid.docker.managed</Name>
