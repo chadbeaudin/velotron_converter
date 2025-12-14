@@ -44,6 +44,8 @@ def setup_directories():
         if not os.path.exists(path):
             os.makedirs(path)
             print(f"Created directory: {path}")
+        else:
+            print(f"Directory already exists, using existing directory: {path}")
 
 def process_file(filename):
     """Process a single PWX file found in the original directory."""
@@ -124,10 +126,9 @@ def monitor_directory():
     """Main monitoring loop."""
     watch_dir = os.path.join(BASE_DIRECTORY, ORIGINAL_DIR_NAME)
     
-    print(f"Monitoring directory: {watch_dir}")
     print(f"Velotron Converter Version: {os.getenv('APP_VERSION', 'unknown')}")
-    print(f"Current Working Directory: {os.getcwd()}")
-    print(f"Place PWX files in '{ORIGINAL_DIR_NAME}' folder to convert them.")
+    print(f"Monitoring directory: {watch_dir}")
+    print(f"Place PWX files in the '{watch_dir}' folder to convert them to TCX and FIT.")
     print(f"Press Ctrl+C to stop.")
     sys.stdout.flush()
     
