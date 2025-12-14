@@ -29,6 +29,28 @@ jobs:
         with:
           go-version: '1.20'
 
+      # Check whether this repo contains Go modules (go.mod / go.sum)
+      - name: Check for Go modules
+        id: has_go
+        run: |
+          if [ -f go.mod ]; then
+            echo "found=true" >> $GITHUB_OUTPUT
+          else
+            echo "found=false" >> $GITHUB_OUTPUT
+          fi
+
+      # Only attempt to cache/restore Go modules if go.mod exists
+      - name: Cache Go modules
+        if: steps.has_go.outputs.found == 'true'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
       - name: Run tests
         run: |
           set -e
