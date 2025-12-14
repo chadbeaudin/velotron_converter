@@ -125,6 +125,7 @@ jobs:
           build-args: |
             TZ=America/Denver
             LOGO_FILE=logo.png
+            VERSION=v${{ steps.version.outputs.version }}
 
       - name: Image info
         if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'

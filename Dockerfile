@@ -16,6 +16,10 @@ ARG LOGO_FILE=logo.png
 # Copy the build-time-specified logo into the image
 COPY ${LOGO_FILE} /usr/share/velotron/logo.png
 
+# Set version environment variable
+ARG VERSION=unknown
+ENV APP_VERSION=${VERSION}
+
 # Create directories for volume mounting
 RUN mkdir -p /data/original /data/converted /data/processed /data/failed
 

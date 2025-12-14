@@ -123,6 +123,7 @@ def monitor_directory():
     watch_dir = os.path.join(BASE_DIRECTORY, ORIGINAL_DIR_NAME)
     
     print(f"Monitoring directory: {watch_dir}")
+    print(f"Velotron Converter Version: {os.getenv('APP_VERSION', 'unknown')}")
     print(f"Current Working Directory: {os.getcwd()}")
     print(f"Place PWX files in '{ORIGINAL_DIR_NAME}' folder to convert them.")
     print(f"Press Ctrl+C to stop.")
