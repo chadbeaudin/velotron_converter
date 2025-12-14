@@ -104,9 +104,9 @@ This repository contains the velotron-converter Docker image and (optionally) an
 
 3. On your Unraid server:
    - Open the Web UI → Apps (Community Applications).
-   - Click the three-dot menu (Manage Repositories / Add Repository).
+   - In the lefthand menu under Settings.
    - Paste the GitHub repository URL for this project, for example:
-     `https://github.com/<your-github-username>/velotron_converter`
+     `https://github.com/chadbeaudin/velotron_converter`
    - Click Add / OK and allow Community Applications to refresh the repo index.
 
 4. Search for `velotron-converter` in Community Applications and install the template.

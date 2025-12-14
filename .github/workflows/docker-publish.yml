@@ -48,12 +48,16 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     # only publish on pushes, not PRs
-    if: "github.event_name == 'push'"
+    if: "github.event_name == 'push' || github.event_name == 'release'"
+    # allow committing template updates back to the repo
     permissions:
-      contents: read
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # allow push using GITHUB_TOKEN
+          persist-credentials: true
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -114,6 +118,52 @@ jobs:
           registry: docker.io
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract version / tag
+        id: meta
+        run: |
+          echo "SHORT_COMMIT=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          TAG=${GITHUB_REF##*/}
+          echo "TAG_NAME=${TAG}" >> $GITHUB_OUTPUT
+
+      - name: "Update CA template with release tag"
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          TAG: ${{ steps.meta.outputs.TAG_NAME }}
+        run: |
+          set -e
+          echo "Updating templates/velotron-converter.xml to tag=${TAG}"
+          mkdir -p templates
+          cat > templates/velotron-converter.xml <<EOF
+          <?xml version="1.0"?>
+          <Container>
+            <Name>velotron-converter</Name>
+            <Repository>bigtimber/velotron-converter</Repository>
+            <Registry>docker.io</Registry>
+            <Tag>${TAG}</Tag>
+            <Version>${TAG}</Version>
+            <Overview>Automated converter for Velotron files (pwx → tcx/fit)</Overview>
+            <Description>Monitors a host-mounted directory and converts Velotron files to TCX/FIT. Configure a host path for /data.</Description>
+            <Map>
+              <Name>data</Name>
+              <ContainerPath>/data</ContainerPath>
+              <HostPath>/mnt/user/appdata/velotron</HostPath>
+              <Mode>rw</Mode>
+            </Map>
+            <Environment>
+              <Variable>
+                <Name>BASE_DIRECTORY</Name>
+                <Value>/data</Value>
+                <Description>Base directory inside the container</Description>
+              </Variable>
+            </Environment>
+          </Container>
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add templates/velotron-converter.xml
+          git commit -m "chore: update Community Applications template for ${TAG}" || echo "No changes to commit"
+          git push origin HEAD:${GITHUB_REF_NAME:-main} || git push
 
       - name: Extract version / tag
         id: meta
