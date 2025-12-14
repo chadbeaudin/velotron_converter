@@ -14,7 +14,7 @@ COPY monitor_and_convert.py .
 # Allow specifying the logo filename at build time (default: logo.png)
 ARG LOGO_FILE=logo.png
 # Copy the build-time-specified logo into the image
-COPY ${LOGO_FILE} /data/logo.png
+COPY ${LOGO_FILE} /usr/share/velotron/logo.png
 
 # Create directories for volume mounting
 RUN mkdir -p /data/original /data/converted /data/processed /data/failed
