@@ -27,24 +27,24 @@ if args.directory:
     MONITOR_PATH = args.directory
     USING_CLI_ARG = True
 else:
-    MONITOR_PATH = os.getenv('MONITOR_PATH', '/monitor')
+    MONITOR_PATH = os.getenv('MONITOR_PATH', '/veloMonitor')
 
 BASE_DIRECTORY = os.path.abspath(MONITOR_PATH)
 
 # VALIDATION: Prevent "Creating Directory" loop on Unraid
 # If the path doesn't exist, AND we didn't explicitly ask for it via CLI,
-# AND the default /monitor mount point DOES exist... then it's a config error.
+# AND the default /veloMonitor mount point DOES exist... then it's a config error.
 if not os.path.exists(BASE_DIRECTORY) and not USING_CLI_ARG:
-    if os.path.exists('/monitor'):
+    if os.path.exists('/veloMonitor'):
         print(f"\nSaved you from a crash! :)")
         print(f"CRITICAL MISCONFIGURATION DETECTED:")
         print(f"-------------------------------------------------------------")
         print(f"The Container is trying to look at: '{BASE_DIRECTORY}'")
         print(f"BUT that directory does not exist inside this container.")
-        print(f"However, the default path '/monitor' DOES exist.")
+        print(f"However, the default path '/veloMonitor' DOES exist.")
         print(f"-------------------------------------------------------------")
-        print(f"SOLUTION: Change your 'MONITOR_PATH' variable to '/monitor'.")
-        print(f"Unraid has mapped your external files to '/monitor', so that is")
+        print(f"SOLUTION: Change your 'MONITOR_PATH' variable to '/veloMonitor'.")
+        print(f"Unraid has mapped your external files to '/veloMonitor', so that is")
         print(f"where the script needs to look.")
         print(f"-------------------------------------------------------------\n")
         print("Sleeping for 60 seconds to prevent restart loop...")

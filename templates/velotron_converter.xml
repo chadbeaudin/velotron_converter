@@ -9,11 +9,11 @@
   <Description>Monitors /data/original (host /mnt/user/dropBox/original) and converts .pwx files to Strava-compatible .tcx and .fit files.</Description>
 
   <Config>
-    <Config Name="Monitor Directory" Target="/monitor" Default="/mnt/user/dropBox" Mode="rw" Description="Select your Unraid Share/Folder here. This maps it to '/monitor' inside the container." Type="Path" Display="always" Required="true" Mask="false"/>
+    <Config Name="Monitor Directory" Target="/veloMonitor" Default="/mnt/user/dropBox" Mode="rw" Description="Select your Unraid Share/Folder here. This maps it to '/veloMonitor' inside the container." Type="Path" Display="always" Required="true" Mask="false"/>
     
     <Config Name="App Data Directory" Target="/app" Default="/mnt/user/appdata/velotron_converter" Mode="rw" Description="Directory for application data" Type="Path" Display="advanced" Required="true" Mask="false"/>
 
-    <Config Name="Internal Container Path (DO NOT CHANGE)" Target="MONITOR_PATH" Default="/monitor" Mode="" Description="This tells the script to look at '/monitor'. Unraid maps your folder to '/monitor' automatically." Type="Variable" Display="advanced" Required="true" Mask="false"/>
+    <Config Name="Internal Container Path (DO NOT CHANGE)" Target="MONITOR_PATH" Default="/veloMonitor" Mode="" Description="This tells the script to look at '/veloMonitor'. Unraid maps your folder to '/veloMonitor' automatically." Type="Variable" Display="advanced" Required="true" Mask="false"/>
 
     <Config Name="Timezone" Target="TZ" Default="America/Denver" Mode="" Description="Container Timezone" Type="Variable" Display="always" Required="false" Mask="false"/>
 

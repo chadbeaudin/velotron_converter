@@ -24,7 +24,7 @@ ENV APP_VERSION=${VERSION}
 RUN mkdir -p /data/original /data/converted /data/processed /data/failed
 
 # Set environment variable for monitor directory
-ENV MONITOR_PATH=/monitor
+ENV MONITOR_PATH=/veloMonitor
 
 # Run the monitor script
 # Run the monitor script
