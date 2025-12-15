@@ -51,6 +51,23 @@ if not os.path.exists(BASE_DIRECTORY) and not USING_CLI_ARG:
         time.sleep(60)
         sys.exit(1)
 
+# Permissions Configuration (Unraid/LinuxServer style)
+try:
+    PUID = int(os.getenv('PUID', '99'))
+    PGID = int(os.getenv('PGID', '100'))
+except ValueError:
+    print("Warning: Invalid PUID/PGID environment variables. Using defaults 99/100.")
+    PUID = 99
+    PGID = 100
+
+def set_permissions(path):
+    """Apply PUID/PGID permissions to a file or directory."""
+    try:
+        os.chown(path, PUID, PGID)
+        # print(f"  -> Permissions set for: {os.path.basename(path)}")
+    except Exception as e:
+        print(f"  -> Warning: Could not set permissions for {path}: {e}")
+
 ORIGINAL_DIR_NAME = "original"
 CONVERTED_DIR_NAME = "converted"
 PROCESSED_DIR_NAME = "processed"
@@ -65,9 +82,12 @@ def setup_directories():
         path = os.path.join(BASE_DIRECTORY, dir_name)
         if not os.path.exists(path):
             os.makedirs(path)
+            set_permissions(path)
             print(f"Existing directory not found.  Created directory: {path}")
         else:
-            print(f"Directory already exists, using existing directory: {path}")
+            # Enforce permissions on existing directories too (in case they were created by root previously)
+            set_permissions(path)
+            # print(f"Directory already exists, using existing directory: {path}")
 
 def process_file(filename):
     """Process a single PWX file found in the original directory."""
@@ -113,6 +133,7 @@ def process_file(filename):
     try:
         # 1. Convert to TCX
         convert_pwx_to_tcx(input_path, tcx_path)
+        set_permissions(tcx_path)
         print(f"  -> Generated TCX: converted/{tcx_filename}")
 
         # 2. Convert to FIT (if enabled)
@@ -121,6 +142,7 @@ def process_file(filename):
             fit_path = os.path.join(BASE_DIRECTORY, CONVERTED_DIR_NAME, fit_filename)
             try:
                 convert_pwx_to_fit(input_path, fit_path)
+                set_permissions(fit_path)
                 print(f"  -> Generated FIT: converted/{fit_filename}")
             except Exception as e:
                 print(f"  -> FIT Conversion Failed: {e}")
@@ -130,6 +152,7 @@ def process_file(filename):
         # Move original file to 'processed'
         processed_dest = os.path.join(BASE_DIRECTORY, PROCESSED_DIR_NAME, filename)
         shutil.move(input_path, processed_dest)
+        set_permissions(processed_dest)
         print(f"Completed processing: {filename}")
         print(f"  -> Original moved to processed/")
         sys.stdout.flush()
@@ -139,8 +162,9 @@ def process_file(filename):
         # Move failed file to 'failed'
         try:
             failed_dest = os.path.join(BASE_DIRECTORY, FAILED_DIR_NAME, filename)
-            shutil.move(input_path, failed_dest)
-            print(f"  -> Moved original to failed/")
+        shutil.move(input_path, failed_dest)
+        set_permissions(failed_dest)
+        print(f"  -> Moved original to failed/")
         except Exception as move_err:
             print(f"  -> CRITICAL: Could not move failed file: {move_err}")
 
