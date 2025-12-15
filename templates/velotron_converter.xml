@@ -28,10 +28,6 @@
       <Name>com.unraid.docker.webui</Name>
       <Value>false</Value>
     </Label>
-    <Label>
-      <Name>com.unraid.docker.icon</Name>
-      <Value>/usr/share/velotron/logo.png</Value>
-    </Label>
   </Config>
 
   <Icon>https://raw.githubusercontent.com/chadbeaudin/velotron_converter/master/logo.png</Icon>
