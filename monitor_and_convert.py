@@ -162,9 +162,9 @@ def process_file(filename):
         # Move failed file to 'failed'
         try:
             failed_dest = os.path.join(BASE_DIRECTORY, FAILED_DIR_NAME, filename)
-        shutil.move(input_path, failed_dest)
-        set_permissions(failed_dest)
-        print(f"  -> Moved original to failed/")
+            shutil.move(input_path, failed_dest)
+            set_permissions(failed_dest)
+            print(f"  -> Moved original to failed/")
         except Exception as move_err:
             print(f"  -> CRITICAL: Could not move failed file: {move_err}")
 
