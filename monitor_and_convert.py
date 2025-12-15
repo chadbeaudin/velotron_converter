@@ -23,11 +23,11 @@ args = parser.parse_args()
 
 # Configuration
 if args.directory:
-    BASE_DIRECTORY = os.path.abspath(args.directory)
-elif os.getenv('BASE_DIRECTORY'):
-    BASE_DIRECTORY = os.path.abspath(os.getenv('BASE_DIRECTORY'))
+    MONITOR_PATH = args.directory
 else:
-    BASE_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+    MONITOR_PATH = os.getenv('MONITOR_PATH', '/monitor')
+
+BASE_DIRECTORY = os.path.abspath(MONITOR_PATH)
 
 ORIGINAL_DIR_NAME = "original"
 CONVERTED_DIR_NAME = "converted"

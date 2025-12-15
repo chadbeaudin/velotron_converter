@@ -23,8 +23,8 @@ ENV APP_VERSION=${VERSION}
 # Create directories for volume mounting
 RUN mkdir -p /data/original /data/converted /data/processed /data/failed
 
-# Set environment variable for base directory
-ENV BASE_DIRECTORY=/data
+# Set environment variable for monitor directory
+ENV MONITOR_PATH=/monitor
 
 # Run the monitor script
 # Run the monitor script
