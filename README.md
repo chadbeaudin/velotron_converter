@@ -95,21 +95,25 @@ Both TCX and FIT files contain identical data. Choose based on your needs:
 This repository contains the velotron-converter Docker image and (optionally) an Unraid Community Applications template.
 
 ## Add this repo to Unraid (Community Applications)
+Pre-requisites:
+- You must have a share created in Unraid (e.g., `veloMonitor`).  This is where the converter will look for new files to convert.
 
-1. Ensure a template file exists in this repository at:
-   - `templates/velotron-converter.xml`
-   - If you don't have one yet, create `templates/velotron-converter.xml` with the container metadata (image: `bigtimber/velotron-converter`).
 
-2. Push the repository to GitHub (it must be public or accessible to your Unraid server).
+1. On your Unraid server:
+   - Open your "Apps" tab and search for "Velotron-Converter"
+   - If you don't see any results, click on the "DockerHub" button.
+   - Click install and then "yes" to the dialog.
+     - This will perform some pre-installation checks and then install the template.
+   - After installation, in the app config screen scroll to the bottom and click the "Add another Path, Port, Variable, Label or Device" link
+   - Add set the following:
+     - Config Type: Path
+     - Name: Monitor Directory
+     - Container Path: /veloMonitor
+     - Host Path: /mnt/user/veloMonitor (or the path to the share you created in Unraid)
+     - Default Value: (this can be left blank)
+     - Access Mode: Read/Write
+  - Click "Apply" and the container will start.
 
-3. On your Unraid server:
-   - Open the Web UI → Apps (Community Applications).
-   - In the lefthand menu under Settings.
-   - Paste the GitHub repository URL for this project, for example:
-     `https://github.com/chadbeaudin/velotron_converter`
-   - Click Add / OK and allow Community Applications to refresh the repo index.
-
-4. Search for `velotron-converter` in Community Applications and install the template.
 
 ## Quick notes / troubleshooting
 - The template must live in the repository under `templates/*.xml` for Community Applications to find it.
