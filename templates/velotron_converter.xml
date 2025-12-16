@@ -30,7 +30,7 @@
     </Label>
   </Config>
 
-  <Icon>https://raw.githubusercontent.com/chadbeaudin/velotron_converter/master/logo.png</Icon>
+  <Icon>https://raw.githubusercontent.com/chadbeaudin/velotron_converter/refs/heads/master/logo.png</Icon>
 
   <Extra>
     <Display>
