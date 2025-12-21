@@ -30,14 +30,6 @@ STRAVA_ENABLED = len(missing_vars) == 0
 
 if STRAVA_ENABLED:
     strava_uploader = StravaUploader(STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, STRAVA_REFRESH_TOKEN)
-    print("Strava auto-import: ENABLED")
-else:
-    if len(missing_vars) == 3:
-        # All missing, just a simple disabled message
-        print("Strava auto-import: DISABLED")
-    else:
-        # Partially configured, be helpful
-        print(f"Strava auto-import: DISABLED (missing: {', '.join(missing_vars)})")
 
 # Parse command-line arguments
 parser = argparse.ArgumentParser(description='Monitor and convert PWX files to TCX/FIT formats')
@@ -267,7 +259,12 @@ def monitor_directory():
     watch_dir = os.path.join(BASE_DIRECTORY, ORIGINAL_DIR_NAME)
     
     print(f"\nVelotron Converter Version: {os.getenv('APP_VERSION', 'unknown')}\n")
-    print("Strava Integration: Ready\n")
+    
+    if STRAVA_ENABLED:
+        print("Strava Integration: ENABLED\n")
+    else:
+        print(f"Strava Integration: DISABLED (missing: {', '.join(missing_vars)})\n")
+    
     print(f"Monitoring directory: {watch_dir}")
     print(f"Place PWX files in the '{watch_dir}' folder to convert them to TCX and FIT.")
     #print(f"Press Ctrl+C to stop.")
