@@ -3,6 +3,9 @@ FROM python:3.9-slim
 # Set working directory
 WORKDIR /app
 
+# Add label for Unraid icon
+LABEL org.opencontainers.image.icon="https://raw.githubusercontent.com/chadbeaudin/velotron_converter/master/logo.png"
+
 # Install dependencies
 RUN pip install --no-cache-dir fit_tool requests
 
