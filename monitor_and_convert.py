@@ -263,7 +263,8 @@ def monitor_directory():
     if STRAVA_ENABLED:
         print("Strava Integration: ENABLED\n")
     else:
-        print(f"Strava Integration: DISABLED (missing: {', '.join(missing_vars)})\n")
+        print(f"Strava Integration: DISABLED please add the following variables to enable Strava integration:\n(missing: {', '.join(missing_vars)})\n")
+        print("Please add the above missing variables to enable Strava integration.")
     
     print(f"Monitoring directory: {watch_dir}")
     print(f"Place PWX files in the '{watch_dir}' folder to convert them to TCX and FIT.")
