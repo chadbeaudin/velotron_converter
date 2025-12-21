@@ -4,12 +4,14 @@ FROM python:3.9-slim
 WORKDIR /app
 
 # Install dependencies
-RUN pip install --no-cache-dir fit_tool
+RUN pip install --no-cache-dir fit_tool requests
 
 # Copy converter scripts
 COPY convert_pwx_to_tcx.py .
 COPY convert_pwx_to_fit.py .
 COPY monitor_and_convert.py .
+COPY strava_uploader.py .
+COPY strava_setup.py .
 
 # Allow specifying the logo filename at build time (default: logo.png)
 ARG LOGO_FILE=logo.png

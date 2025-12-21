@@ -15,6 +15,19 @@ except ImportError:
     print("Warning: 'fit_tool' library not found. FIT conversion will be disabled.")
     print("To enable FIT support, run: pip install fit_tool")
 
+# Strava Support
+from strava_uploader import StravaUploader
+STRAVA_CLIENT_ID = os.getenv('STRAVA_CLIENT_ID')
+STRAVA_CLIENT_SECRET = os.getenv('STRAVA_CLIENT_SECRET')
+STRAVA_REFRESH_TOKEN = os.getenv('STRAVA_REFRESH_TOKEN')
+STRAVA_ENABLED = all([STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, STRAVA_REFRESH_TOKEN])
+
+if STRAVA_ENABLED:
+    strava_uploader = StravaUploader(STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, STRAVA_REFRESH_TOKEN)
+    print("Strava auto-import: ENABLED")
+else:
+    print("Strava auto-import: DISABLED (missing STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, or STRAVA_REFRESH_TOKEN)")
+
 # Parse command-line arguments
 parser = argparse.ArgumentParser(description='Monitor and convert PWX files to TCX/FIT formats')
 parser.add_argument('directory', nargs='?', default=None, 
@@ -27,7 +40,15 @@ if args.directory:
     MONITOR_PATH = args.directory
     USING_CLI_ARG = True
 else:
-    MONITOR_PATH = os.getenv('MONITOR_PATH', '/veloMonitor')
+    # Default to current directory if not in Docker /veloMonitor
+    if os.path.exists('/veloMonitor'):
+        MONITOR_PATH = '/veloMonitor'
+    elif os.path.exists('/Volumes/veloMonitor'):
+        MONITOR_PATH = '/Volumes/veloMonitor'
+        print(f"Network drive found - using: {MONITOR_PATH}")
+    else:
+        MONITOR_PATH = os.getcwd()
+        print(f"Running locally - using directory: {MONITOR_PATH}")
 
 BASE_DIRECTORY = os.path.abspath(MONITOR_PATH)
 
@@ -52,21 +73,33 @@ if not os.path.exists(BASE_DIRECTORY) and not USING_CLI_ARG:
         sys.exit(1)
 
 # Permissions Configuration (Unraid/LinuxServer style)
-try:
-    PUID = int(os.getenv('PUID', '99'))
-    PGID = int(os.getenv('PGID', '100'))
-except ValueError:
-    print("Warning: Invalid PUID/PGID environment variables. Using defaults 99/100.")
-    PUID = 99
-    PGID = 100
+# Only active if PUID/PGID are explicitly set in environment
+PUID = os.getenv('PUID')
+PGID = os.getenv('PGID')
+if PUID: PUID = int(PUID)
+if PGID: PGID = int(PGID)
 
 def set_permissions(path):
-    """Apply PUID/PGID permissions to a file or directory."""
+    """Apply PUID/PGID permissions only if configured."""
+    if not PUID or not PGID:
+        return
     try:
         os.chown(path, PUID, PGID)
-        # print(f"  -> Permissions set for: {os.path.basename(path)}")
     except Exception as e:
-        print(f"  -> Warning: Could not set permissions for {path}: {e}")
+        pass # Silently fail on local systems where this isn't supported
+
+def safe_move(src, dst):
+    """Robust move that handles network drives and metadata errors."""
+    try:
+        shutil.move(src, dst)
+    except Exception as e:
+        # If shutil.move fails (often metadata/permission issues on network drives),
+        # try a manual copy and delete.
+        try:
+            shutil.copyfile(src, dst)
+            os.remove(src)
+        except Exception as inner_e:
+            raise Exception(f"Failed to move file from {src} to {dst}: {inner_e}")
 
 ORIGINAL_DIR_NAME = "original"
 CONVERTED_DIR_NAME = "converted"
@@ -149,9 +182,59 @@ def process_file(filename):
         else:
             print("  -> FIT conversion skipped (library missing)")
         
+        # 3. Import to Strava (if enabled)
+        if STRAVA_ENABLED:
+            # Prefer FIT for Strava if it exists, otherwise use TCX
+            upload_path = None
+            if FIT_SUPPORT_ENABLED:
+                fit_filename = f"{base_name}.fit"
+                fit_path = os.path.join(BASE_DIRECTORY, CONVERTED_DIR_NAME, fit_filename)
+                if os.path.exists(fit_path):
+                    upload_path = fit_path
+            
+            if not upload_path:
+                upload_path = tcx_path
+            
+            print(f"  -> Uploading to Strava: {os.path.basename(upload_path)}...")
+            try:
+                result = strava_uploader.upload_file(upload_path)
+                if result == "duplicate":
+                    pass # Message already printed by uploader
+                elif result:
+                    print(f"  -> Strava upload initiated (ID: {result})")
+                    print("  Waiting for Strava to process...", end="", flush=True)
+                    # Poll for activity ID (max 15 seconds)
+                    activity_id = None
+                    for _ in range(5):
+                        time.sleep(3)
+                        print(".", end="", flush=True)
+                        status = strava_uploader.check_upload_status(result)
+                        if status and status.get('activity_id'):
+                            activity_id = status.get('activity_id')
+                            break
+                        if status and status.get('error'):
+                            err_msg = status.get('error', '')
+                            if 'duplicate' in err_msg.lower() or 'already exists' in err_msg.lower():
+                                print(f"\n  -> Note: This activity is already on Strava (Duplicate).")
+                                result = "duplicate" # Mark as duplicate so we don't print "processing" fail
+                            else:
+                                print(f"\n  -> Strava Processing Error: {err_msg}")
+                            break
+                    
+                    if activity_id:
+                        print(f"\n  -> SUCCESS! Strava Activity: https://www.strava.com/activities/{activity_id}")
+                    elif result == "duplicate":
+                        pass
+                    else:
+                        print("\n  -> Upload still processing - check your Strava account shortly.")
+                else:
+                    print("  -> Strava upload failed (check logs for details)")
+            except Exception as e:
+                print(f"  -> Strava upload error: {e}")
+        
         # Move original file to 'processed'
         processed_dest = os.path.join(BASE_DIRECTORY, PROCESSED_DIR_NAME, filename)
-        shutil.move(input_path, processed_dest)
+        safe_move(input_path, processed_dest)
         set_permissions(processed_dest)
         print(f"Completed processing: {filename}")
         print(f"  -> Original moved to processed/")
@@ -162,7 +245,7 @@ def process_file(filename):
         # Move failed file to 'failed'
         try:
             failed_dest = os.path.join(BASE_DIRECTORY, FAILED_DIR_NAME, filename)
-            shutil.move(input_path, failed_dest)
+            safe_move(input_path, failed_dest)
             set_permissions(failed_dest)
             print(f"  -> Moved original to failed/")
         except Exception as move_err:

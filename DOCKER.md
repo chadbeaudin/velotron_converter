@@ -39,9 +39,11 @@ This guide explains how to run the Velotron Converter as a Docker container on U
      - Container Path: `/data`
      - Host Path: `/mnt/user/appdata/velotron`
      - Access Mode: `Read/Write`
-   - **Add Variable**:
-     - Key: `TZ`
-     - Value: `America/Denver` (or your timezone)
+   - **Add Variables**:
+     - `TZ`: `America/Denver` (or your timezone)
+     - `STRAVA_CLIENT_ID`: (Your Client ID)
+     - `STRAVA_CLIENT_SECRET`: (Your Client Secret)
+     - `STRAVA_REFRESH_TOKEN`: (Your Refresh Token)
    - Click "Apply"
 
 ## Directory Structure on Unraid

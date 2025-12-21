@@ -11,6 +11,9 @@ services:
       - ./data:/data
     environment:
       - TZ=America/Denver # Set your timezone
+      - STRAVA_CLIENT_ID= # Optional: Your Strava Client ID
+      - STRAVA_CLIENT_SECRET= # Optional: Your Strava Client Secret
+      - STRAVA_REFRESH_TOKEN= # Optional: Your Strava Refresh Token
     labels:
       - "com.unraid.docker.managed=true"
       - "com.unraid.docker.webui=false"

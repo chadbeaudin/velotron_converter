@@ -19,7 +19,7 @@ This utility monitors a directory for RacerMate Velotron `.pwx` files and automa
 1.  Ensure you have Python 3 installed.
 2.  Install dependencies:
     ```bash
-    pip install fit_tool
+    pip install fit_tool requests
     ```
 
 ### Option 2: Docker/Unraid
@@ -50,6 +50,7 @@ See [DOCKER.md](DOCKER.md) for complete Docker deployment instructions.
     *   Original file is moved to `processed`.
     *   **Progress**: You will see a real-time progress percentage in the terminal.
     *   **Summary**: After conversion, a summary of the ride (Distance, Duration, Elevation) is displayed.
+    *   **Strava Import**: If configured, the script will automatically upload the converted file (preferring FIT format) to your Strava account.
 
 ## Directory Structure
 
@@ -89,6 +90,33 @@ Both TCX and FIT files contain identical data. Choose based on your needs:
 - ✅ Widely compatible
 
 **Recommendation**: Use FIT files for normal uploads. Use TCX if you need to inspect the file contents or troubleshoot issues.
+
+## Strava Integration
+
+The converter can automatically import your workouts into Strava as soon as they are processed.
+
+### 1. Get your Strava API Credentials
+
+You will need a `Client ID`, `Client Secret`, and a `Refresh Token`.
+
+1.  Go to [Strava API Settings](https://www.strava.com/settings/api).
+2.  Create an application (use "localhost" for the Authorization Callback Domain).
+3.  Note your **Client ID** and **Client Secret**.
+4.  Run the setup assistant to get your **Refresh Token**:
+    ```bash
+    python3 strava_setup.py
+    ```
+    Follow the prompts to authorize the app and copy the resulting refresh token.
+
+### 2. Configure the Service
+
+Set the following environment variables (in your Docker config or local shell):
+
+- `STRAVA_CLIENT_ID`: Your Client ID
+- `STRAVA_CLIENT_SECRET`: Your Client Secret
+- `STRAVA_REFRESH_TOKEN`: Your Refresh Token (obtained in step 4 above)
+
+When these variables are present, the converter will automatically upload every successful conversion to your Strava profile. It prefers the `.fit` format for Strava imports but will fallback to `.tcx` if FIT support is disabled.
 
 # velotron_converter
 
