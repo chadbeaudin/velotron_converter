@@ -13,7 +13,6 @@ class StravaUploader:
 
     def refresh_access_token(self):
         """Refreshes the access token using the refresh token."""
-        print("Refreshing Strava access token...")
         url = "https://www.strava.com/oauth/token"
         payload = {
             'client_id': self.client_id,
@@ -24,6 +23,18 @@ class StravaUploader:
         
         try:
             response = requests.post(url, data=payload)
+            
+            if response.status_code == 400:
+                error_data = response.json()
+                error_msg = error_data.get('message', '').lower()
+                if 'client_id' in str(error_data).lower() or 'invalid client' in str(error_data).lower():
+                    print("  !! ERROR: Strava STRAVA_CLIENT_ID or STRAVA_CLIENT_SECRET is incorrect.")
+                elif 'refresh_token' in str(error_data).lower() or 'invalid_grant' in str(error_data).lower():
+                    print("  !! ERROR: Strava STRAVA_REFRESH_TOKEN is invalid or expired.")
+                else:
+                    print(f"  !! ERROR: Strava Authentication failed: {error_data.get('message', 'Unknown Error')}")
+                return False
+                
             response.raise_for_status()
             data = response.json()
             
@@ -31,17 +42,10 @@ class StravaUploader:
             self.refresh_token = data.get('refresh_token', self.refresh_token) # Strava may return a new refresh token
             self.expires_at = data['expires_at']
             
-            # Note: In a production environment, you might want to save the new refresh token 
-            # if it changed, but for this simple script, we'll rely on the user 
-            # updating their environment variables if it ever truly changes.
-            # Strava refresh tokens are usually very long-lived and don't change often.
-            
             print("Successfully refreshed Strava access token.")
             return True
         except Exception as e:
-            print(f"Error refreshing Strava token: {e}")
-            if hasattr(e, 'response') and e.response is not None:
-                print(f"Response: {e.response.text}")
+            print(f"  !! ERROR: Could not connect to Strava for token refresh: {e}")
             return False
 
     def ensure_token(self):

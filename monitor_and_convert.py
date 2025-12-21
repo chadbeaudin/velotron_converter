@@ -20,13 +20,24 @@ from strava_uploader import StravaUploader
 STRAVA_CLIENT_ID = os.getenv('STRAVA_CLIENT_ID')
 STRAVA_CLIENT_SECRET = os.getenv('STRAVA_CLIENT_SECRET')
 STRAVA_REFRESH_TOKEN = os.getenv('STRAVA_REFRESH_TOKEN')
-STRAVA_ENABLED = all([STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, STRAVA_REFRESH_TOKEN])
+
+missing_vars = []
+if not STRAVA_CLIENT_ID: missing_vars.append('STRAVA_CLIENT_ID')
+if not STRAVA_CLIENT_SECRET: missing_vars.append('STRAVA_CLIENT_SECRET')
+if not STRAVA_REFRESH_TOKEN: missing_vars.append('STRAVA_REFRESH_TOKEN')
+
+STRAVA_ENABLED = len(missing_vars) == 0
 
 if STRAVA_ENABLED:
     strava_uploader = StravaUploader(STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, STRAVA_REFRESH_TOKEN)
     print("Strava auto-import: ENABLED")
 else:
-    print("Strava auto-import: DISABLED (missing STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, or STRAVA_REFRESH_TOKEN)")
+    if len(missing_vars) == 3:
+        # All missing, just a simple disabled message
+        print("Strava auto-import: DISABLED")
+    else:
+        # Partially configured, be helpful
+        print(f"Strava auto-import: DISABLED (missing: {', '.join(missing_vars)})")
 
 # Parse command-line arguments
 parser = argparse.ArgumentParser(description='Monitor and convert PWX files to TCX/FIT formats')
