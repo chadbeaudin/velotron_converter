@@ -266,7 +266,8 @@ def monitor_directory():
     """Main monitoring loop."""
     watch_dir = os.path.join(BASE_DIRECTORY, ORIGINAL_DIR_NAME)
     
-    print(f"\nVelotron Converter Version: {os.getenv('APP_VERSION', 'unknown')} \n\n")
+    print(f"\nVelotron Converter Version: {os.getenv('APP_VERSION', 'unknown')}\n")
+    print("Strava Integration: Ready\n")
     print(f"Monitoring directory: {watch_dir}")
     print(f"Place PWX files in the '{watch_dir}' folder to convert them to TCX and FIT.")
     #print(f"Press Ctrl+C to stop.")
