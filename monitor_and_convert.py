@@ -168,7 +168,7 @@ def process_file(filename):
     
     try:
         # 1. Convert to TCX
-        convert_pwx_to_tcx(input_path, tcx_path)
+        convert_pwx_to_tcx(input_path, tcx_path, strava_optimized=STRAVA_ENABLED)
         set_permissions(tcx_path)
         print(f"  -> Generated TCX: converted/{tcx_filename}")
 
@@ -177,9 +177,12 @@ def process_file(filename):
             fit_filename = f"{base_name}.fit"
             fit_path = os.path.join(BASE_DIRECTORY, CONVERTED_DIR_NAME, fit_filename)
             try:
-                convert_pwx_to_fit(input_path, fit_path)
+                convert_pwx_to_fit(input_path, fit_path, strava_optimized=STRAVA_ENABLED)
                 set_permissions(fit_path)
-                print(f"  -> Generated FIT: converted/{fit_filename}")
+                if os.path.exists(fit_path):
+                    print(f"  -> Generated FIT: {fit_path}")
+                else:
+                    print(f"  -> WARNING: FIT file not found at expected path: {fit_path}")
             except Exception as e:
                 print(f"  -> FIT Conversion Failed: {e}")
         else:
@@ -200,7 +203,9 @@ def process_file(filename):
             
             print(f"  -> Uploading to Strava: {os.path.basename(upload_path)}...")
             try:
-                result = strava_uploader.upload_file(upload_path)
+                # Use virtualride type to ensure Strava trusts the elevation data 
+                # and doesn't apply map-based correction to static GPS.
+                result = strava_uploader.upload_file(upload_path, activity_type="virtualride")
                 if result == "duplicate":
                     pass # Message already printed by uploader
                 elif result:
@@ -239,6 +244,7 @@ def process_file(filename):
         processed_dest = os.path.join(BASE_DIRECTORY, PROCESSED_DIR_NAME, filename)
         safe_move(input_path, processed_dest)
         set_permissions(processed_dest)
+        
         print(f"Completed processing: {filename}")
         print(f"  -> Original moved to processed/")
         sys.stdout.flush()
@@ -260,15 +266,19 @@ def monitor_directory():
     
     print(f"\nVelotron Converter Version: {os.getenv('APP_VERSION', 'unknown')}\n")
     
+    if FIT_SUPPORT_ENABLED:
+        print("FIT Conversion: ENABLED")
+    else:
+        print("FIT Conversion: DISABLED (fit_tool library missing)")
+
     if STRAVA_ENABLED:
         print("Strava Integration: ENABLED\n")
     else:
-        print(f"Strava Integration: DISABLED please add the following variables to enable Strava integration:\n(missing: {', '.join(missing_vars)})\n")
-        print("Please add the above missing variables to enable Strava integration.")
+        print(f"Strava Integration: DISABLED please add the following missing environment variables to enable Strava integration and restart.\n(missing: {', '.join(missing_vars)})\n")
     
-    print(f"Monitoring directory: {watch_dir}")
+    print(f"Monitoring directory: {os.path.abspath(watch_dir)}")
+    print(f"Base Directory: {BASE_DIRECTORY}")
     print(f"Place PWX files in the '{watch_dir}' folder to convert them to TCX and FIT.")
-    #print(f"Press Ctrl+C to stop.")
     sys.stdout.flush()
     
     setup_directories()

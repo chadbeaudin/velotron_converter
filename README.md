@@ -1,4 +1,4 @@
-# Velotron to Strava Converter
+# Velotron to Strava Converter (v1.1.0)
 
 This utility monitors a directory for RacerMate Velotron `.pwx` files and automatically converts them to Strava-compatible `.tcx` and `.fit` files.
 

@@ -9,7 +9,7 @@ from fit_tool.profile.profile_type import Manufacturer, FileType, Sport, SubSpor
 import xml.etree.ElementTree as ET
 import sys
 
-def convert_pwx_to_fit(pwx_file_path, fit_file_path):
+def convert_pwx_to_fit(pwx_file_path, fit_file_path, strava_optimized=False):
     # Namespaces
     ns_pwx = {'pwx': 'http://www.thierrys-world.de/pwx/'} # Adjust if different
     
@@ -94,9 +94,10 @@ def convert_pwx_to_fit(pwx_file_path, fit_file_path):
         record = RecordMessage()
         record.timestamp = timestamp_ms
         
-        # Position: Removed due to encoding issues
-        # record.position_lat = int(40.0150 * (2**31 / 180))
-        # record.position_long = int(-105.2705 * (2**31 / 180))
+        if strava_optimized:
+            # Position: Required for Strava to display HR/Power graphs and respect elevation
+            record.position_lat = 40.0150
+            record.position_long = -105.2705
 
         # Distance
         dist_node = sample.find('pwx:dist', ns_pwx)
@@ -120,17 +121,17 @@ def convert_pwx_to_fit(pwx_file_path, fit_file_path):
         # Heart Rate
         hr_node = sample.find('pwx:hr', ns_pwx)
         if hr_node is not None:
-            record.heart_rate = int(hr_node.text)
+            record.heart_rate = int(float(hr_node.text))
 
         # Cadence
         cad_node = sample.find('pwx:cad', ns_pwx)
         if cad_node is not None:
-            record.cadence = int(cad_node.text)
+            record.cadence = int(float(cad_node.text))
 
         # Power
         pwr_node = sample.find('pwx:pwr', ns_pwx)
         if pwr_node is not None:
-            record.power = int(pwr_node.text)
+            record.power = int(float(pwr_node.text))
 
         # Speed
         spd_node = sample.find('pwx:spd', ns_pwx)
@@ -158,6 +159,8 @@ def convert_pwx_to_fit(pwx_file_path, fit_file_path):
     lap.total_distance = total_dist
     lap.max_speed = max_speed
     lap.total_ascent = total_ascent
+    if strava_optimized:
+        lap.total_descent = 0.0 # Strava often needs this to trust the profile
     builder.add(lap)
 
     # SESSION
@@ -169,8 +172,13 @@ def convert_pwx_to_fit(pwx_file_path, fit_file_path):
     session.total_distance = total_dist
     session.max_speed = max_speed
     session.total_ascent = total_ascent
-    session.sport = Sport.CYCLING
-    session.sub_sport = SubSport.INDOOR_CYCLING  # Removed: prevents HR graphs in Strava
+    if strava_optimized:
+        session.total_descent = 0.0
+        session.sport = Sport.CYCLING
+        session.sub_sport = 58 # VIRTUAL_ACTIVITY
+    else:
+         session.sport = Sport.CYCLING
+         session.sub_sport = SubSport.INDOOR_CYCLING
     session.first_lap_index = 0
     session.num_laps = 1
     builder.add(session)

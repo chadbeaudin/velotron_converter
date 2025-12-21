@@ -3,7 +3,7 @@ import datetime
 import sys
 import os
 
-def convert_pwx_to_tcx(input_file, output_file):
+def convert_pwx_to_tcx(input_file, output_file, strava_optimized=False):
     try:
         tree = ET.parse(input_file)
         root = tree.getroot()
@@ -60,9 +60,14 @@ def convert_pwx_to_tcx(input_file, output_file):
     })
 
     activities = ET.SubElement(tcx_root, "Activities")
-    activity = ET.SubElement(activities, "Activity", Sport="Biking")
-    ET.SubElement(activity, "Id").text = start_time_str
-    ET.SubElement(activity, "Notes").text = "Indoor Cycling"
+    if strava_optimized:
+        activity = ET.SubElement(activities, "Activity", Sport="VirtualRide")
+        ET.SubElement(activity, "Id").text = start_time_str
+        ET.SubElement(activity, "Notes").text = "Virtual Ride"
+    else:
+        activity = ET.SubElement(activities, "Activity", Sport="Biking")
+        ET.SubElement(activity, "Id").text = start_time_str
+        ET.SubElement(activity, "Notes").text = "Indoor Cycling"
     
     # Creator metadata (copied from working sample to ensure Strava trusts elevation)
     creator = ET.SubElement(activity, "Creator")
@@ -158,11 +163,11 @@ def convert_pwx_to_tcx(input_file, output_file):
         if hr_node is not None:
             hr_val = hr_node.text
             hr_elm = ET.SubElement(trackpoint, "HeartRateBpm")
-            ET.SubElement(hr_elm, "Value").text = hr_val
+            ET.SubElement(hr_elm, "Value").text = str(int(float(hr_val)))
             
         # 6. Cadence
         if cad_node is not None:
-            ET.SubElement(trackpoint, "Cadence").text = cad_node.text
+            ET.SubElement(trackpoint, "Cadence").text = str(int(float(cad_node.text)))
 
         # 7. Extensions (Power, Speed)
         if pwr_node is not None or spd_node is not None:
@@ -170,7 +175,7 @@ def convert_pwx_to_tcx(input_file, output_file):
             tpx = ET.SubElement(extensions, f"{{{tpx_ns}}}TPX")
             
             if pwr_node is not None:
-                ET.SubElement(tpx, f"{{{tpx_ns}}}Watts").text = pwr_node.text
+                ET.SubElement(tpx, f"{{{tpx_ns}}}Watts").text = str(int(float(pwr_node.text)))
             
             if spd_node is not None:
                  ET.SubElement(tpx, f"{{{tpx_ns}}}Speed").text = spd_node.text

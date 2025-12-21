@@ -55,7 +55,7 @@ class StravaUploader:
             return self.refresh_access_token()
         return True
 
-    def upload_file(self, file_path, activity_type="ride", description="Uploaded by Velotron Converter"):
+    def upload_file(self, file_path, activity_type=None, description="Uploaded by Velotron Converter"):
         """Uploads a FIT or TCX file to Strava."""
         if not self.ensure_token():
             print("Cannot upload to Strava: Token refresh failed.")
@@ -72,11 +72,16 @@ class StravaUploader:
         headers = {
             'Authorization': f"Bearer {self.access_token}"
         }
+        
+        # We send a minimal payload to force Strava to read metadata from the file.
+        # This mimics a manual web upload as closely as possible.
         payload = {
-            'activity_type': activity_type,
             'description': description,
             'data_type': file_extension
         }
+        
+        if activity_type:
+            payload['activity_type'] = activity_type
         
         try:
             with open(file_path, 'rb') as f:
