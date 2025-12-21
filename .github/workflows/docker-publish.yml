@@ -88,15 +88,28 @@ jobs:
           major_pattern: "(MAJOR)"
           minor_pattern: "(feat)"
           version_format: "${major}.${minor}.${patch}"
-          user_last_commit: true
           
       - name: Tag Repository
         if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
         run: |
+          NEW_TAG="v${{ steps.version.outputs.version }}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag v${{ steps.version.outputs.version }}
-          git push origin v${{ steps.version.outputs.version }}
+          
+          # Check if tag already exists
+          if git rev-parse "$NEW_TAG" >/dev/null 2>&1; then
+            echo "Tag $NEW_TAG already exists locally."
+          else
+            echo "Creating local tag $NEW_TAG"
+            git tag "$NEW_TAG"
+          fi
+
+          if git ls-remote --tags origin | grep -q "refs/tags/$NEW_TAG"; then
+            echo "Tag $NEW_TAG already exists on remote origin."
+          else
+            echo "Pushing tag $NEW_TAG to remote"
+            git push origin "$NEW_TAG"
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
