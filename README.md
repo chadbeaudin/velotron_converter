@@ -16,10 +16,20 @@ This utility monitors a directory for RacerMate Velotron `.pwx` files and automa
 - `pip install fit_tool` (Optional, required for `.fit` file generation)
 
 **Installation:**
-1.  Ensure you have Python 3 installed.
-2.  Install dependencies:
+
+1.  **Requirement**: Python 3.11+ is recommended to ensure modern SSL support.
+2.  **Virtual Environment (Recommended)**:
+    Creating a virtual environment ensures you use the correct Python version and avoids system-level SSL warnings (especially common on macOS).
     ```bash
-    pip install fit_tool requests
+    python3 -m venv venv
+    source venv/bin/activate
+    pip install requests pytest pytest-mock
+    # Optional: for FIT support
+    pip install fit_tool 
+    ```
+3.  **Global Installation**:
+    ```bash
+    pip install requests fit_tool
     ```
 
 ### Option 2: Docker/Unraid
@@ -115,6 +125,9 @@ Set the following environment variables (in your Docker config or local shell):
 - `STRAVA_CLIENT_ID`: Your Client ID
 - `STRAVA_CLIENT_SECRET`: Your Client Secret
 - `STRAVA_REFRESH_TOKEN`: Your Refresh Token (obtained in step 4 above)
+- `MONITOR_PATH`: (Optional) The directory to monitor.
+    *   **Docker/Unraid**: This should match your "Container Path" (e.g., `/veloMonitor`).
+    *   **Logic**: The script automatically checks for `/veloMonitor` and `/velotronMonitor`. If you use a different path, you **must** set this variable.
 
 When these variables are present, the converter will automatically upload every successful conversion to your Strava profile. It prefers the `.fit` format for Strava imports but will fallback to `.tcx` if FIT support is disabled.
 
@@ -154,5 +167,24 @@ Pre-requisites:
 
 ## Example template location (in this repo)
 - `templates/velotron-converter.xml`
+
+## Testing
+
+A comprehensive test suite is included in the `tests/` directory.
+
+### Running Tests
+
+If using the recommended virtual environment:
+```bash
+source venv/bin/activate
+pytest
+```
+
+Otherwise:
+```bash
+python3 -m pytest
+```
+
+The test suite covers conversion logic, path detection robustness, and Strava integration.
 
 That's it — after adding the repository in Community Applications, the app should appear in the Apps search and be installable on your Unraid server.

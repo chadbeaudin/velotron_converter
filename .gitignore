@@ -5,7 +5,7 @@ processed/
 *.tcx
 __pycache__/
 *.DS_Store
-
-processed/
+venv/
+.pytest_cache/
 velotron_converter.tar.gz
 velotron_converter.code-workspace
