@@ -47,7 +47,7 @@ See [DOCKER.md](DOCKER.md) for complete Docker deployment instructions.
     
     **Custom directory mode**:
     ```bash
-    python3 monitor_and_convert.py /path/to/your/directory
+    python3 monitor_and_convert.py /path/to/directory/to/monitor
     ```
     
     The script will create/use `original/`, `converted/`, `processed/`, and `failed/` subdirectories in the specified location.
@@ -120,7 +120,7 @@ You will need a `Client ID`, `Client Secret`, and a `Refresh Token`.
 
 ### 2. Configure the Service
 
-Set the following environment variables (in your Docker config or local shell):
+Set the following environment variables (in your Docker config or local environment/shell):
 
 - `STRAVA_CLIENT_ID`: Your Client ID
 - `STRAVA_CLIENT_SECRET`: Your Client Secret
@@ -129,7 +129,7 @@ Set the following environment variables (in your Docker config or local shell):
     *   **Docker/Unraid**: This should match your "Container Path" (e.g., `/veloMonitor`).
     *   **Logic**: The script automatically checks for `/veloMonitor` and `/velotronMonitor`. If you use a different path, you **must** set this variable.
 
-When these variables are present, the converter will automatically upload every successful conversion to your Strava profile. It prefers the `.fit` format for Strava imports but will fallback to `.tcx` if FIT support is disabled.
+When these variables are present, automatic Strava uploads will be enabled andthe converter will upload every successful conversion to your Strava profile. It prefers the `.fit` format for Strava imports but will fallback to `.tcx` if FIT support is disabled.
 
 # velotron_converter
 
@@ -148,29 +148,17 @@ Pre-requisites:
    - After installation, in the app config screen scroll to the bottom and click the "Add another Path, Port, Variable, Label or Device" link
    - Add set the following:
      - Config Type: Path
-     - Name: Monitor Directory
-     - Container Path: /veloMonitor
-     - Host Path: /mnt/user/veloMonitor (or the path to the share you created in Unraid)
+     - Name: `MONITOR_PATH`
+     - Container Path: `/veloMonitor`
+     - Host Path: `/mnt/user/veloMonitor` (or the path to the share you created in Unraid)
      - Default Value: (this can be left blank)
      - Access Mode: Read/Write
   - Click "Apply" and the container will start.
 
 
-## Quick notes / troubleshooting
-- The template must live in the repository under `templates/*.xml` for Community Applications to find it.
-- Make sure the template's `<Repository>` (image) matches `bigtimber/velotron-converter`.
-- If the app does not appear:
-  - Refresh the Community Applications repositories.
-  - Verify the repo is public.
-  - Confirm the template file path is `templates/velotron-converter.xml`.
-  - Check CA logs for errors.
-
-## Example template location (in this repo)
-- `templates/velotron-converter.xml`
-
 ## Testing
 
-A comprehensive test suite is included in the `tests/` directory.
+A test suite is included in the `tests/` directory.
 
 ### Running Tests
 
