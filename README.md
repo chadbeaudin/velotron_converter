@@ -1,4 +1,4 @@
-# Velotron to Strava Converter (v1.1.0)
+# Velotron to Strava Converter (v1.1.1)
 
 This utility monitors a directory for RacerMate Velotron `.pwx` files and automatically converts them to Strava-compatible `.tcx` and `.fit` files.
 
@@ -78,9 +78,11 @@ Converted files are named using the ride's timestamp from the PWX file (e.g., `2
 
 ## Technical Details
 
-To ensure Strava correctly displays all data (elevation, HR graphs, power, etc.):
+To ensure Strava and Garmin Connect correctly display all data (elevation, HR graphs, power, etc.):
 1.  **Static GPS Coordinates**: TCX files use a fixed location (Boulder, CO) to enable Strava's time-series graphs while preserving barometric elevation data.
-2.  **Device Metadata**: Mimics a "Garmin Edge 530" device to ensure Strava trusts the elevation and sensor data.
+2.  **Device Metadata**: Mimics a "Garmin Edge 530" device. This is crucial for:
+    *   **Garmin Connect Compatibility**: Allows files exported from Strava (or other sources) to be imported into Garmin Connect as "proper" rides recorded on a native device.
+    *   **Elevation Trust**: Ensures Strava trusts the file's elevation data instead of applying its own GPS-based "Elevation Correction."
 3.  **Timezone Handling**: Automatically adds local timezone info to timestamps so activities appear at the correct time in Strava.
 4.  **Indoor Cycling Flag**: Both formats are marked as indoor cycling activities.
 
