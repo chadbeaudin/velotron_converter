@@ -9,11 +9,12 @@ from convert_pwx_to_tcx import convert_pwx_to_tcx
 # Optional FIT support
 try:
     from convert_pwx_to_fit import convert_pwx_to_fit
+    from inject_garmin import inject_garmin_id
     FIT_SUPPORT_ENABLED = True
 except ImportError:
     FIT_SUPPORT_ENABLED = False
-    print("Warning: 'fit_tool' library not found. FIT conversion will be disabled.")
-    print("To enable FIT support, run: pip install fit_tool")
+    inject_garmin_id = None
+    print("Warning: 'fit_tool' library not found. FIT conversion and metadata injection will be disabled.")
 
 # Strava Support
 from strava_uploader import StravaUploader
@@ -270,6 +271,46 @@ def process_file(filename):
         except Exception as move_err:
             print(f"  -> CRITICAL: Could not move failed file: {move_err}")
 
+def process_fit_file(filename):
+    """Process a single FIT file by injecting Garmin ID."""
+    input_path = os.path.join(BASE_DIRECTORY, ORIGINAL_DIR_NAME, filename)
+    
+    # Output goes to converted with same name
+    output_path = os.path.join(BASE_DIRECTORY, CONVERTED_DIR_NAME, filename)
+    
+    print(f"\nFound FIT file: {filename}")
+    print(f"Injecting Garmin Metadata: {filename}...")
+    sys.stdout.flush()
+    
+    try:
+        if not FIT_SUPPORT_ENABLED:
+            raise Exception("FIT support is disabled (library missing)")
+            
+        if inject_garmin_id(input_path, output_path):
+            set_permissions(output_path)
+            print(f"  -> Generated Modified FIT: {output_path}")
+            
+            # Move original file to 'processed'
+            processed_dest = os.path.join(BASE_DIRECTORY, PROCESSED_DIR_NAME, filename)
+            safe_move(input_path, processed_dest)
+            set_permissions(processed_dest)
+            
+            print(f"Completed processing: {filename}")
+            print(f"  -> Original moved to processed/")
+        else:
+            raise Exception("Failed to inject Garmin ID")
+            
+    except Exception as e:
+        print(f"  -> FAILED: {e}")
+        # Move failed file to 'failed'
+        try:
+            failed_dest = os.path.join(BASE_DIRECTORY, FAILED_DIR_NAME, filename)
+            safe_move(input_path, failed_dest)
+            set_permissions(failed_dest)
+            print(f"  -> Moved original to failed/")
+        except Exception as move_err:
+            print(f"  -> CRITICAL: Could not move failed file: {move_err}")
+
 def monitor_directory():
     """Main monitoring loop."""
     watch_dir = os.path.join(BASE_DIRECTORY, ORIGINAL_DIR_NAME)
@@ -297,10 +338,14 @@ def monitor_directory():
         while True:
             # List files in the watch directory
             for filename in os.listdir(watch_dir):
+                filepath = os.path.join(watch_dir, filename)
+                if not os.path.isfile(filepath):
+                    continue
+                    
                 if filename.lower().endswith(".pwx"):
-                    # Check if it's a file (not a dir)
-                    if os.path.isfile(os.path.join(watch_dir, filename)):
-                        process_file(filename)
+                    process_file(filename)
+                elif filename.lower().endswith(".fit"):
+                    process_fit_file(filename)
             
             time.sleep(POLL_INTERVAL)
             

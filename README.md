@@ -1,4 +1,4 @@
-# Velotron to Strava Converter (v1.1.1)
+# Velotron to Strava Converter (v1.2.0)
 
 This utility monitors a directory for RacerMate Velotron `.pwx` files and automatically converts them to Strava-compatible `.tcx` and `.fit` files.
 
@@ -53,11 +53,14 @@ See [DOCKER.md](DOCKER.md) for complete Docker deployment instructions.
     The script will create/use `original/`, `converted/`, `processed/`, and `failed/` subdirectories in the specified location.
 
 2.  **Convert Files**:
-    *   Drop your `.pwx` files into the `original` folder.
-    *   The script will generate **two** output files in the `converted` folder:
+    *   Drop your `.pwx` **or** `.fit` files into the `original` folder.
+    *   For `.pwx` files, the script will generate:
         *   `YYYY-MM-DD_HH-MM-SS.tcx` (Strava-compatible TCX)
         *   `YYYY-MM-DD_HH-MM-SS.fit` (Strava-compatible FIT)
-    *   Original file is moved to `processed`.
+    *   For `.fit` files (e.g. from Strava/Whoosh), the script will:
+        *   Inject Garmin device metadata (Edge 530) to ensure full compatibility.
+        *   Place the modified file in the `converted` folder.
+    *   Original files are moved to `processed`.
     *   **Progress**: You will see a real-time progress percentage in the terminal.
     *   **Summary**: After conversion, a summary of the ride (Distance, Duration, Elevation) is displayed.
     *   **Strava Import**: If configured, the script will automatically upload the converted file (preferring FIT format) to your Strava account.
@@ -83,8 +86,9 @@ To ensure Strava and Garmin Connect correctly display all data (elevation, HR gr
 2.  **Device Metadata**: Mimics a "Garmin Edge 530" device. This is crucial for:
     *   **Garmin Connect Compatibility**: Allows files exported from Strava (or other sources) to be imported into Garmin Connect as "proper" rides recorded on a native device.
     *   **Elevation Trust**: Ensures Strava trusts the file's elevation data instead of applying its own GPS-based "Elevation Correction."
-3.  **Timezone Handling**: Automatically adds local timezone info to timestamps so activities appear at the correct time in Strava.
-4.  **Indoor Cycling Flag**: Both formats are marked as indoor cycling activities.
+3.  **Direct FIT Support**: You can now drop existing `.fit` files into the `original/` folder. The monitor will automatically inject the Garmin identity metadata and place the ready-to-import file in `converted/`.
+4.  **Timezone Handling**: Automatically adds local timezone info to timestamps so activities appear at the correct time in Strava.
+5.  **Indoor Cycling Flag**: Both formats are marked as indoor cycling activities.
 
 ## Which Format Should I Upload?
 
