@@ -32,6 +32,9 @@ STRAVA_ENABLED = len(missing_vars) == 0
 if STRAVA_ENABLED:
     strava_uploader = StravaUploader(STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, STRAVA_REFRESH_TOKEN)
 
+# Debug mode
+DEBUG_MODE = os.getenv('DEBUG_MODE', '0') == '1'
+
 # Parse command-line arguments
 parser = argparse.ArgumentParser(description='Monitor and convert PWX files to TCX/FIT formats')
 parser.add_argument('directory', nargs='?', default=None, 
@@ -330,6 +333,8 @@ def monitor_directory():
     print(f"Monitoring directory: {os.path.abspath(watch_dir)}")
     print(f"Base Directory: {BASE_DIRECTORY}")
     print(f"Place PWX files in the '{watch_dir}' folder to convert them to TCX and FIT.")
+    if DEBUG_MODE:
+        print("[DEBUG] Debug mode is ENABLED - scan results will be logged every cycle.")
     sys.stdout.flush()
     
     setup_directories()
@@ -337,7 +342,16 @@ def monitor_directory():
     try:
         while True:
             # List files in the watch directory
-            for filename in os.listdir(watch_dir):
+            files_in_dir = os.listdir(watch_dir)
+            if DEBUG_MODE:
+                processable = [f for f in files_in_dir if os.path.isfile(os.path.join(watch_dir, f))]
+                if processable:
+                    print(f"[DEBUG] Scan found {len(processable)} file(s): {processable}")
+                else:
+                    print(f"[DEBUG] Scan: directory is empty or contains no files.")
+                sys.stdout.flush()
+
+            for filename in files_in_dir:
                 filepath = os.path.join(watch_dir, filename)
                 if not os.path.isfile(filepath):
                     continue
@@ -346,6 +360,9 @@ def monitor_directory():
                     process_file(filename)
                 elif filename.lower().endswith(".fit"):
                     process_fit_file(filename)
+                elif DEBUG_MODE:
+                    print(f"[DEBUG] Skipping unrecognized file: {filename}")
+                    sys.stdout.flush()
             
             time.sleep(POLL_INTERVAL)
             
