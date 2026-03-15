@@ -12,6 +12,7 @@ RUN pip install --no-cache-dir fit_tool requests
 # Copy converter scripts
 COPY convert_pwx_to_tcx.py .
 COPY convert_pwx_to_fit.py .
+COPY inject_garmin.py .
 COPY monitor_and_convert.py .
 COPY strava_uploader.py .
 COPY strava_setup.py .
